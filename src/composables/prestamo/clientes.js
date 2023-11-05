@@ -145,11 +145,9 @@ export const useCliente = () => {
     const buscarDatosDni = async(data) => {
         try {
             
-            let respond = await prestamoApi.get('/api/personas/dni/'+data.numero_documento+'/?tipo_documento_id='+data.tipo_documento_id, config)
+            let respond = await prestamoApi.get('/api/personas/dni?numero_documento='+data.numero_documento+'&tipo_documento_id='+data.tipo_documento_id, config)
            
             persona.value = JSON.parse(jwtDecode(respond.data).personaDni);
-
-            console.log(persona.value)
         }
         catch (error) {
             errors.value = [];
