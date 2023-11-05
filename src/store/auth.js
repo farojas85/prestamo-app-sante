@@ -4,7 +4,7 @@ export default class Auth {
     constructor() {        
         this.user = null;
         if(localStorage.getItem('token-api')){
-            this.user = JSON.parse( JSON.stringify(jwtDecode(localStorage.getItem('token-api')||""))).user
+            this.user = jwtDecode(localStorage.getItem('token-api')).user
             this.user.foto = import.meta.env.VITE_APP_API_URL + this.user.foto
         }
     }
