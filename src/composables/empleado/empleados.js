@@ -171,7 +171,7 @@ export const useEmpleado = () => {
     const buscarDatosDni = async(data) => {
         try {
             
-            let respond = await prestamoApi.get('/api/personas/dni/'+data.numero_documento+'/?tipo_documento_id='+data.tipo_documento_id)
+            let respond = await prestamoApi.get('/api/personas/dni/'+data.numero_documento+'/?tipo_documento_id='+data.tipo_documento_id, config)
             if(respond.status == 200)
             {
                 //persona.value = jwtDecode(respond.data).personaDni;
