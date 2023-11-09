@@ -2,11 +2,10 @@
 import { onMounted, ref, inject } from 'vue';
 import { defineTitle } from '../../helpers';
 import ContentHeader from '../../components/ContentHeader.vue';
-// import { useDatosSession } from '../../composables/session';
+import { useDatosSession } from '../../composables/session';
 import ListadoEmpleadoView from './Listado.vue';
 
-// const { usuario, puede } = useDatosSession();
-const Auth = inject('Auth');
+const { usuario, puede } = useDatosSession();
 
 const titleHeader = ref({
     titulo:'Empleados',
@@ -40,7 +39,7 @@ const cambiarVista =(nuevaVista, icono) => {
                         <div class="card-header">
                             <button class="btn btn-app bg-primary"
                                 @click.prevent="cambiarVista('Empleados','fas fa-users-line')"
-                                v-if="Auth.puede('tipo-accesos.inicio')">
+                                v-if="puede('tipo-accesos.inicio')">
                                 <i class="fas fa-users-line"></i> Empleados
                             </button>
                             <!-- <button class="btn btn-app bg-primary"

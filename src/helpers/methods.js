@@ -11,8 +11,10 @@ export const getdataParamsPagination = ( data) => {
 }
 
 export const getdataParamsPaginationByUser = ( data) => {
-    const user = inject('Auth').user.id
-    const role = inject('Auth').roles()[0]
+    let usuario = jwtDecode(localStorage.getItem('token-api')).user ?? null;
+    
+    let user = (usuario) ? usuario.id : ""
+    let role = (usuario) ? usuario.roles[0].slug : ""
     return "?page=" + data.page + "&paginacion="+ data.paginacion + "&buscar=" +data.buscar
             +"&user="+user+"&role="+role;
 }

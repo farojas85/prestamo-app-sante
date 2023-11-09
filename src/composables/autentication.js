@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref,inject } from 'vue';
 import { jwtDecode } from 'jwt-decode';
 import { getConfigHeader } from '../helpers'
 import { prestamoApi } from '../api';
@@ -13,9 +13,9 @@ export const useAutenticacion = () => {
 
         errors.value = [];
         try {
-            let response = await prestamoApi.post('/api/login',usuario.value)
-            localStorage.setItem('token-api',  JSON.stringify(response.data)) 
-            
+            let response = await prestamoApi.post('/api/login',usuario.value);
+            localStorage.setItem('token-api',  JSON.stringify(response.data));
+
             window.location.href = '/dashboard';
 
         }
@@ -29,6 +29,7 @@ export const useAutenticacion = () => {
     }
 
     const logoutUsuario = async(user_id) => {
+
         let respond = await prestamoApi.post('/api/logout',{id:user_id}, config)
 
         if(respond.status == 200 && respond.data.ok==1)

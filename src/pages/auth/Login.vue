@@ -1,16 +1,13 @@
 <script setup>
 import { ref } from 'vue';
-// import { useUserStore } from '../../store';
-
-// const {
-//     errors, loginUser
-// } = useUserStore();
 import { useAutenticacion } from '../../composables/autentication';
 
 const { errors, usuario, loginUsuario } = useAutenticacion();
 
 const autenticar = async() => {
     await loginUsuario(usuario.value)
+
+    console.log(errors)
 }
 
 </script>

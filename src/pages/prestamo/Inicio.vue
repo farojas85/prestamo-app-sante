@@ -1,15 +1,13 @@
 <script setup>
 import { onMounted, ref, inject } from 'vue';
 import { defineTitle } from '../../helpers';
-// import { useDatosSession } from '../../composables/session';
+import { useDatosSession } from '../../composables/session';
 
 import ContentHeader from '../../components/ContentHeader.vue';
 import ClienteView from './cliente/Inicio.vue';
 import PrestamoList from './Listado.vue';
 
-
-// const { usuario, puede } = useDatosSession();
-const Auth = inject('Auth')
+const { usuario, puede } = useDatosSession();
 
 const titleHeader = ref({
     titulo:'Préstamos',
@@ -42,12 +40,12 @@ const cambiarVista =(nuevaVista, icono) => {
                         <div class="card-header">
                             <button class="btn btn-app bg-primary"
                                 @click.prevent="cambiarVista('Préstamos','fas fa-handshake-angle')"
-                                v-if="Auth.puede('tipo-accesos.inicio')">
+                                v-if="puede('tipo-accesos.inicio')">
                                 <i class="fas fa-handshake-angle"></i> Prestamos
                             </button>
                             <button class="btn btn-app bg-primary"
                                 @click.prevent="cambiarVista('Clientes','fas fa-users')"
-                                v-if="Auth.puede('clientes.inicio')">
+                                v-if="puede('clientes.inicio')">
                                 <i class="fas fa-users-line"></i> Clientes
                             </button>
                         </div>

@@ -2,13 +2,13 @@
 import { onMounted, ref, inject } from 'vue';
 import { defineTitle } from '../../helpers';
 import ContentHeader from '../../components/ContentHeader.vue';
-// import { useDatosSession } from '../../composables/session';
+import { useDatosSession } from '../../composables/session';
 import FrecuenciaPagoView from './frecuencia-pago/Inicio.vue';
 import AplicacionInteresView from './aplicacion-interes/Inicio.vue';
 import AplicacionMoraView from './aplicacion-mora/Inicio.vue';
 import MonedaView from './moneda/Inicio.vue';
 
-// const { usuario, puede } = useDatosSession();
+const { usuario, puede } = useDatosSession();
 
 const Auth = inject('Auth');
 
@@ -43,22 +43,22 @@ const cambiarVista =(nuevaVista, icono) => {
                         <div class="card-header">
                             <button class="btn btn-app bg-primary"
                                 @click.prevent="cambiarVista('Frecuencia Pagos','far fa-calendar-days')"
-                                v-if="Auth.puede('frecuencia-pagos.inicio')" >
+                                v-if="puede('frecuencia-pagos.inicio')" >
                                 <i class="far fa-calendar-days"></i> Frecuencia Pagos
                             </button>
                             <button class="btn btn-app bg-primary"
                                 @click.prevent="cambiarVista('Aplicación Intereses','fas fa-i')"
-                                v-if="Auth.puede('aplicacion-intereses.inicio')">
+                                v-if="puede('aplicacion-intereses.inicio')">
                                 <i class="fas fa-i"></i> Aplicación Intereses
                             </button>
                             <button class="btn btn-app bg-primary"
                                 @click.prevent="cambiarVista('Aplicación Moras','fas fa-list-check')"
-                                v-if="Auth.puede('aplicacion-moras.inicio')" >
+                                v-if="puede('aplicacion-moras.inicio')" >
                                 <i class="fas fa-list-check"></i> Aplicación Moras
                             </button>
                             <button class="btn btn-app bg-primary"
                                 @click.prevent="cambiarVista('Monedas','fas fa-coins')"
-                                v-if="Auth.puede('monedas.inicio')" >
+                                v-if="puede('monedas.inicio')" >
                                 <i class="fas fa-coins"></i> Monedas
                             </button>
                             <!--<button class="btn btn-app bg-primary"

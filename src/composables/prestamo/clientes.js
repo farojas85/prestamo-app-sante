@@ -159,8 +159,6 @@ export const useCliente = () => {
             //     errors.value = respond.data.error
             // }
         }
-
-
     }
 
     const agregarCliente = async(data) => {

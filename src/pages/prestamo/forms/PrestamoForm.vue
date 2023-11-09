@@ -1,7 +1,11 @@
 <script setup>
-import { toRefs, onMounted, ref } from 'vue';
+import { toRefs, onMounted, ref, computed } from 'vue';
 import ClienteForm from './ClienteForm.vue';
+import { useHelper } from '../../../helpers';
 import {usePrestamo } from '../../../composables/prestamo/prestamos';
+
+
+const { soloNumeros } = useHelper();
 
 const props = defineProps({
     form: Object,
@@ -14,6 +18,10 @@ const { form, cardTitle } = toRefs(props);
 const cambiarCrud = (crud) => {
     form.value.estado_crud = crud;
 }
+
+const buscarDni = ref("");
+
+const errorBusqueda = ref("");
 
 const clienteFrm = ref({
     id:'',
@@ -32,8 +40,8 @@ const clienteFrm = ref({
 });
 
 const {
-    frecuenciaPagos,aplicacionIntereses,
-    obtenerListaFrecuenciaPagos, obtenerListaAplicacionInrtereses
+    frecuenciaPagos,aplicacionIntereses, persona,
+    obtenerListaFrecuenciaPagos, obtenerListaAplicacionInrtereses, buscarClienteExiste
 } = usePrestamo();
 
 
@@ -41,14 +49,68 @@ onMounted(() => {
     obtenerListaFrecuenciaPagos();
     obtenerListaAplicacionInrtereses()
 })
-const guardar = async() => {
 
+
+
+form.value.total = computed(() => {
+    return Math.round(parseFloat(form.value.capital_inicial)*( 1 + (parseFloat(form.value.interes)/100) ),2).toFixed(2) ;
+});
+
+form.value.valor_cuota = computed(() => {
+    if(form.value.numero_cuotas <= 0 )  {
+        return Math.round(parseFloat(form.value.total)).toFixed(2);
+    }
+    return Math.round(parseFloat(form.value.total) / form.value.numero_cuotas,2).toFixed(2);
+})
+
+
+const limpiarCliente = () => {
+    clienteFrm.value.id='';
+    clienteFrm.value.tipo_documento_id='';
+    clienteFrm.value.numero_documento='';
+    clienteFrm.value.nombres='';
+    clienteFrm.value.apellido_paterno='';
+    clienteFrm.value.apellido_materno='';
+    clienteFrm.value.sexo_id='';
+    clienteFrm.value.telefono='';
+    clienteFrm.value.direccion='';
+    clienteFrm.value.correo_personal='';
+    clienteFrm.value.es_activo=1;
+    clienteFrm.value.errors=[];
+    clienteFrm.value.estado_crud="";
 }
+
 
 const nuevoCliente = () => {
     clienteFrm.value.estado_crud = 'nuevo'
+    errorBusqueda.value = ''
     $('#modal-cliente-form-title').html('Nuevo Cliente')
     $("#modal-cliente-form").modal('show')
+}
+
+const buscaExisteCliente = async() => {
+    errorBusqueda.value="";
+    limpiarCliente();
+
+    await buscarClienteExiste(buscarDni.value)
+    if(persona.value)
+    {
+        clienteFrm.value
+        clienteFrm.value.numero_documento = persona.value.numero_documento;
+        clienteFrm.value.nombres = persona.value.nombres;
+        clienteFrm.value.apellido_paterno = persona.value.apellido_paterno;
+        clienteFrm.value.apellido_materno = persona.value.apellido_materno;
+        clienteFrm.value.direccion = persona.value.direccion;
+    }
+
+    if(!persona.value)
+    {
+        errorBusqueda.value = "Dni no encontrado.";
+    }
+}
+
+const guardar = async() => {
+
 }
 
 </script>
@@ -77,24 +139,38 @@ const nuevoCliente = () => {
                                                     <span class="input-group-text" id="basic-addon1">N&uacute;mero documento</span>
                                                 </div>
                                                 <input type="text" class="form-control" placeholder="Ingrese número de documento"
-                                                    v-model="clienteFrm.numero_documento"
-                                                    maxlength="15" />
+                                                    v-model="buscarDni"
+                                                    maxlength="15" @keypress="soloNumeros" 
+                                                    @change="buscaExisteCliente"/>
                                                 <div class="input-group-prepend input-group-append-sm">
                                                     <button class="btn btn-info" @click="nuevoCliente">
                                                         <i class="fas fa-plus"></i>
                                                     </button>
                                                 </div>
                                             </div>
+                                            <small class="text-danger" v-if="errorBusqueda">{{ errorBusqueda }}</small>
                                         </div>
                                     </div>
-                                    <div class="row">
+                                    <div class="row" v-if="clienteFrm.nombres">
                                         <div class="col-md-12">
                                             <div class="input-group mb-3">
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text" id="basic-addon1">Nombres y Apellidos</span>
                                                 </div>
                                                 <input type="text" class="form-control" placeholder="Ingrese número de documento"
+                                                    readonly
                                                     :value="clienteFrm.nombres+' '+clienteFrm.apellido_paterno+' '+clienteFrm.apellido_materno"
+                                                    />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="basic-addon1">Dirección</span>
+                                                </div>
+                                                <input type="text" class="form-control" placeholder="Ingrese dirección"
+                                                    readonly
+                                                    :value="clienteFrm.direccion"
                                                     />
                                             </div>
                                         </div>
@@ -112,8 +188,8 @@ const nuevoCliente = () => {
                                 <div class="form-group row">
                                     <div class="col-md-4">
                                         <div class="row">
-                                            <label for="fecha_prestamo" class="col-form-label col-form-label-sm col-md-3">Fecha</label>
-                                            <div class="col-md-9">
+                                            <label for="fecha_prestamo" class="col-form-label col-form-label-sm col-md-4">Fecha</label>
+                                            <div class="col-md-8">
                                                 <input type="date" class="form-control form-control-sm" v-model="form.fecha_prestamo" title="Fecha Préstamo"
                                                     :class="{ 'is-invalid': form.errors.fecha_prestamo }"
                                                     id="fecha_prestamo">
@@ -136,8 +212,8 @@ const nuevoCliente = () => {
                                 <div class="form-group row">
                                     <div class="col-md-4">
                                         <div class="row">
-                                            <label for="monto" class="col-form-label col-form-label-sm col-md-3">Monto</label>
-                                            <div class="col-md-9">
+                                            <label for="monto" class="col-form-label col-form-label-sm col-md-4">Monto</label>
+                                            <div class="col-md-8">
                                                 <input type="text" class="form-control form-control-sm" v-model="form.capital_inicial" title="Capital Inicial"
                                                     :class="{ 'is-invalid': form.errors.capital_inicial }" placeholder="0.00" />
                                             </div>
@@ -160,8 +236,8 @@ const nuevoCliente = () => {
                                 <div class="form-group row">
                                     <div class="col-md-4">
                                         <div class="row">
-                                            <label for="monto" class="col-form-label col-form-label-sm col-md-3">Interés</label>
-                                            <div class="col-md-9">
+                                            <label for="monto" class="col-form-label col-form-label-sm col-md-4">Interés</label>
+                                            <div class="col-md-8">
                                                 <input type="text" class="form-control form-control-sm" v-model="form.interes" title="Interés"
                                                     :class="{ 'is-invalid': form.errors.interes }" placeholder="0.00" />
                                             </div>
@@ -169,10 +245,50 @@ const nuevoCliente = () => {
                                     </div>
                                     <div class="col-md-6">
                                         <div class="row">
-                                            <label for="monto" class="col-form-label col-form-label-sm col-md-3">Número cuotas</label>
+                                            <label for="numero_cuotas" class="col-form-label col-form-label-sm col-md-3">Número cuotas</label>
                                             <div class="col-md-9">
                                                 <input type="text" class="form-control form-control-sm" v-model="form.numero_cuotas" title="Número de Cuotas"
                                                     :class="{ 'is-invalid': form.errors.numero_cuotas }" placeholder="0.00" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-4">
+                                        <div class="row">
+                                            <label for="interes_moratorio" class="col-form-label col-form-label-sm col-md-4">Interés Mora</label>
+                                            <div class="col-md-8">
+                                                <input type="text" class="form-control form-control-sm" v-model="form.interes_moratorio" title="Interés Moratorio"
+                                                    :class="{ 'is-invalid': form.errors.interes_moratorio }" placeholder="0.00" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <label for="monto" class="col-form-label col-form-label-sm col-md-3">Días de gracia</label>
+                                            <div class="col-md-9">
+                                                <input type="text" class="form-control form-control-sm" v-model="form.dias_gracia" title="Número de Cuotas"
+                                                    :class="{ 'is-invalid': form.errors.numero_cuotas }" placeholder="0" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-4">
+                                        <div class="row">
+                                            <label for="interes_moratorio" class="col-form-label col-form-label-sm col-md-4">TOTAL</label>
+                                            <div class="col-md-8">
+                                                <input type="text" class="form-control form-control-sm" v-model="form.total" title="Interés Moratorio"
+                                                    readonly />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <label for="monto" class="col-form-label col-form-label-sm col-md-3">Valor de Cuota</label>
+                                            <div class="col-md-9">
+                                                <input type="text" class="form-control form-control-sm" v-model="form.valor_cuota" title="Valor de la CUota"
+                                                    readonly />
                                             </div>
                                         </div>
                                     </div>

@@ -1,10 +1,12 @@
 <script setup>
 import { ref, toRefs, inject } from 'vue';
-
+import { useDatosSession } from '../composables/session';
 import NavbarUser from './NavbarUser.vue';
 import NavbarSearch from './NavbarSearch.vue';
 
-const usuario = inject('Auth').user
+const {
+    usuario
+} = useDatosSession();
 
 </script>
 <template>

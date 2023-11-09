@@ -1,11 +1,11 @@
 import { defineStore } from "pinia";
 import { jwtDecode } from 'jwt-decode';
 import { prestamoApi } from "../api";
-import { getConfigHeader } from "../helpers";
+import { getConfigHeader, getConfigHeaderPost } from "../helpers";
 
 export const useUserStore = defineStore("usuario",{
     state: () => ({
-        usuario:{},
+        usuario: {},
         roles:[],
         menus:[],
         permisos:[],
@@ -15,36 +15,39 @@ export const useUserStore = defineStore("usuario",{
         async loginUser(credenciales) {
             try {
 
-                const res = await fetch(import.meta.env.VITE_APP_API_URL+'/api/login', {
-                    method: "POST",
-                    headers: {
-                    "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(credenciales.value),
-                });
-                const user = await res.json();
+                const respond = await prestamoApi.post('/api/login',credenciales,getConfigHeaderPost())
+                // const res = await fetch(import.meta.env.VITE_APP_API_URL+'/api/login', {
+                //     method: "POST",
+                //     headers: {
+                //     "Content-Type": "application/json",
+                //     },
+                //     body: JSON.stringify(credenciales.value),
+                // });
+                // const user = await res.json();
                 
+                if(respond.status == 422)
+                {
+                    this.errors = jwtDecode(error.response.data);
+
+                }
                 localStorage.setItem('token-api',  JSON.stringify(user))                
 
-                await this.cargarDatosSession()
+
+
+                //this.cargarDatosSession()
 
                 window.location.href = '/dashboard';
 
             } catch (error) {
                 if(error.response.status === 422)
                 {
-                    let dato = jwtDecode(error.response.data);
-                    this.errors = dato
+                    this.errors = jwtDecode(error.response.data);
                 }
             }
 
         },
-        async cargarDatosSession() {  
-            
-            
-            this.usuario = jwtDecode(localStorage.getItem('token-api')).user;
-            console.log(this.usuario)
-
+        async cargarDatosSession() {              
+            this.usuario = jwtDecode(localStorage.getItem('token-api')||"").user ?? {};
             //this.usuario = jwtDecode(respond).usuario
             this.usuario.foto = import.meta.env.VITE_APP_API_URL+this.usuario.foto;
             this.roles = this.usuario.roles.map(role => role.slug) ?? [];

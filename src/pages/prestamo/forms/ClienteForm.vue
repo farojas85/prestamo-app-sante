@@ -15,6 +15,8 @@ const buscarPersona = ref({
     numero_documento:'' 
 });
 
+const buscandoCliente = ref(false);
+
 const limpiarCliente = () => {
     clienteFrm.value.id = null;
     clienteFrm.value.sexo_id='';
@@ -48,6 +50,7 @@ onMounted(() => {
 const obtenerPersona = async() => {
 
     limpiarCliente();
+    buscandoCliente.value = true;
     buscarPersona.value.tipo_documento_id = clienteFrm.value.tipo_documento_id;
     buscarPersona.value.numero_documento  = clienteFrm.value.numero_documento;
 
@@ -62,6 +65,7 @@ const obtenerPersona = async() => {
         clienteFrm.value.nombres = persona.value.nombres;
         clienteFrm.value.apellido_paterno = persona.value.apellidoPaterno;
         clienteFrm.value.apellido_materno = persona.value.apellidoMaterno;
+        buscandoCliente.value = false
     }
 
     if(persona.value.numero_documento)
@@ -69,7 +73,7 @@ const obtenerPersona = async() => {
         clienteFrm.value.nombres = persona.value.nombres;
         clienteFrm.value.apellido_paterno = persona.value.apellido_paterno;
         clienteFrm.value.apellido_materno = persona.value.apellido_materno;
-        
+        buscandoCliente.value= false
     }
     // if(persona.value)
     // {
@@ -103,6 +107,7 @@ const guardarCliente = async() => {
                 <option value="">-Seleccionar-</option>
                 <option v-for="tipo in tipoDocumentos" :value="tipo.id" :title="tipo.nombre_largo">{{ tipo.nombre_corto }}</option>
             </select>
+            
             <small class="text-danger" v-for="error in clienteFrm.errors.tipo_documento_id" :key="error">{{error }}</small>
         </div>
     </div>
@@ -113,7 +118,8 @@ const guardarCliente = async() => {
                 maxlength="15"    v-model="clienteFrm.numero_documento"
                 :class="{ 'is-invalid' : clienteFrm.errors.numero_documento}" placeholder="Nro. documento de Identidad"
                 @keypress="soloNumeros" @change="obtenerPersona"
-                />
+            />
+            <small class="text-primary" v-if="buscandoCliente"><i class="fas fa-spinner fa-spin"></i> Buscando nro. documento...</small>
             <small class="text-danger" v-for="error in clienteFrm.errors.numero_documento" :key="error">{{error }}</small>
         </div>
     </div>

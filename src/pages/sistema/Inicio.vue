@@ -2,14 +2,14 @@
 import { onMounted, ref, inject } from 'vue';
 import { defineTitle } from '../../helpers';
 import ContentHeader from '../../components/ContentHeader.vue';
-// import { useDatosSession } from '../../composables/session';
+import { useDatosSession } from '../../composables/session';
 import UsuarioView from './usuario/Inicio.vue';
 import TipoAccesoView from './tipo-acceso/Inicio.vue';
 import RoleView from './role/Inicio.vue';
 import MenuView from './menu/Inicio.vue';
 import PermisoView from './permiso/Inicio.vue';
 
-// const { usuario, puede } = useDatosSession();
+const { usuario, puede } = useDatosSession();
 
 const Auth = inject('Auth');
 
@@ -49,17 +49,17 @@ const cambiarVista =(nuevaVista, icono) => {
                             </button> -->
                             <button class="btn btn-app bg-primary"
                                 @click.prevent="cambiarVista('Tipo Accesos','fas fa-low-vision')"
-                                v-if="Auth.puede('tipo-accesos.inicio')">
+                                v-if="puede('tipo-accesos.inicio')">
                                 <i class="fas fa-low-vision"></i> Tipo Acceso
                             </button>
                             <button class="btn btn-app bg-primary"
                                 @click.prevent="cambiarVista('Roles','fas fa-tags')"
-                                v-if="Auth.puede('roles.inicio')" >
+                                v-if="puede('roles.inicio')" >
                                 <i class="fas fa-tags"></i> Roles
                             </button>
                             <button class="btn btn-app bg-primary"
                                 @click.prevent="cambiarVista('Menús','fas fa-bars')"
-                                v-if="Auth.puede('menus.inicio')" >
+                                v-if="puede('menus.inicio')" >
                                 <i class="fas fa-bars"></i> Men&uacute;s
                             </button>
                             <!-- <button class="btn btn-app bg-primary"
@@ -69,7 +69,7 @@ const cambiarVista =(nuevaVista, icono) => {
                             </button> -->
                             <button class="btn btn-app bg-primary"
                                 @click.prevent="cambiarVista('Permisos','fas fa-shield-alt')"
-                                v-if="Auth.puede('permisos.inicio')" >
+                                v-if="puede('permisos.inicio')" >
                                 <i class="fas fa-shield-alt"></i> Permisos
                             </button>
                             <!-- <button class="btn btn-app bg-primary"

@@ -12,6 +12,7 @@ export const usePrestamo = () => {
     const prestamos = ref([]);
     const frecuenciaPagos = ref([]);
     const aplicacionIntereses = ref([]);
+    const persona = ref({});
 
     // const { usuario } = useDatosSession();
 
@@ -25,11 +26,18 @@ export const usePrestamo = () => {
 
     const form = ref({
         id:null,
+        cliente_id:'',
+        fecha_prestamo:'',
+        user_id:'',
         frecuencia_pago_id:1,
-        capital_inicial:'',
+        capital_inicial:0,
         aplicacion_interes_id:2,
         interes:10,
-        numero_cuotas:'',
+        numero_cuotas:1,
+        interes_moratorio:2.5,
+        dias_gracia:0,
+        total:0,
+        valor_cuota:0,
         es_activo:1,
         estado_crud:'',
         errors:[]
@@ -169,12 +177,31 @@ export const usePrestamo = () => {
             aplicacionIntereses.value = jwtDecode(respond.data).aplicacion_intereses
         }
     }
+
+    const buscarClienteExiste = async(data) => {
+        try {
+            
+            let respond = await prestamoApi.get('/api/clientes/exist?numero_documento='+data, config)
+           
+            persona.value = jwtDecode(respond.data).cliente;
+        }
+        catch (error) {
+            errors.value = [];
+            // if(error.response.status == 422) {
+            //     errors.value = error.response.data.errors
+            // }
+            // if(error.response.status == 404)
+            // {
+            //     errors.value = respond.data.error
+            // }
+        }
+    }
     
     return {
-        errors, respuesta, prestamos, dato, form, frecuenciaPagos, aplicacionIntereses,
+        errors, respuesta, prestamos, dato, form, frecuenciaPagos, aplicacionIntereses, persona,
         listar, buscar, isActived, pagesNumber,
         cambiarPagina, cambiarPaginacion, limpiar,
-        obtenerListaFrecuenciaPagos, obtenerListaAplicacionInrtereses
+        obtenerListaFrecuenciaPagos, obtenerListaAplicacionInrtereses, buscarClienteExiste
     }
 
 }

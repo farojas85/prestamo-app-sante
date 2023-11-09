@@ -1,6 +1,6 @@
 <script setup>
 import ContentHeader from '../components/ContentHeader.vue';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, inject } from 'vue';
 import { defineTitle } from '../helpers';
 
 const titleHeader = ref({
