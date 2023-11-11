@@ -50,7 +50,7 @@ export const useUserStore = defineStore("usuario",{
             this.usuario = jwtDecode(localStorage.getItem('token-api')||"").user ?? {};
             //this.usuario = jwtDecode(respond).usuario
             this.usuario.foto = import.meta.env.VITE_APP_API_URL+this.usuario.foto;
-            this.roles = this.usuario.roles.map(role => role.slug) ?? [];
+            this.roles = this.usuario.roles[0] ?? [];
             this.menus = this.usuario.menus ?? [];
             this.permisos = this.usuario.permisos ?? [];
         },

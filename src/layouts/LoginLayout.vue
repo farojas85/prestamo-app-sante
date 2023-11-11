@@ -8,13 +8,7 @@ onMounted(() => {
 });
 </script>
 <template>
-    <div class="position-relative">
-        <div class="authentication-wrapper authentication-basic container-p-y">
-            <div class="authentication-inner py-4">
-                <router-view></router-view>
-            </div>
-        </div>
+    <div class="login-box">
+        <router-view></router-view>
     </div>
-    <!-- <div class="login-box">
-    </div> -->
 </template>

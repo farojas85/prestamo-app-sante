@@ -4,7 +4,9 @@ export const cargarClasesLoginLayout = () => {
     {
         partBody.classList.remove('sidebar-mini');
         partBody.classList.remove('layout-fixed');
+        partBody.classList.remove('layout-navbar-fixed');
         partBody.classList.add('login-page');
+        
     }
 }
 
@@ -15,5 +17,6 @@ export const cargarClasesDefaultLayout = () => {
         partBody.classList.remove('login-page');
         partBody.classList.add('sidebar-mini');
         partBody.classList.add('layout-fixed');
+        partBody.classList.add('layout-navbar-fixed');
     }
 }

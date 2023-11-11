@@ -5,7 +5,7 @@ import DefaultLayout from '../layouts/DefaultLayout.vue';
 
 //PAGES
 import Login from '../pages/auth/Login.vue';
-import Dashboard from '../pages/Dashboard.vue';
+import Dashboard from '../pages/dashboards/Inicio.vue';
 import Sistema from '../pages/sistema/Inicio.vue';
 import Configuracion from '../pages/configuracion/Inicio.vue';
 import Empleado from '../pages/empleado/Inicio.vue';

@@ -1,16 +1,19 @@
 <script setup>
 import { ref, toRefs, inject } from 'vue';
-import { useDatosSession } from '../composables/session';
 import NavbarUser from './NavbarUser.vue';
 import NavbarSearch from './NavbarSearch.vue';
 
-const {
-    usuario
-} = useDatosSession();
+const props = defineProps({
+    usuario: Object
+});
+
+const {usuario} = toRefs(props);
+
+
 
 </script>
 <template>
-    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <nav class="main-header navbar navbar-expand bg-warning navbar-light">
         <!-- Left navbar links -->
         <ul class="navbar-nav">
             <li class="nav-item">
