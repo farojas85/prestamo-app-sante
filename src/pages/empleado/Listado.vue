@@ -77,6 +77,7 @@ const nuevo = () => {
                                     <th class="text-center">Nro. Documento</th>
                                     <th class="text-center">Apellidos y Nombres</th>
                                     <th class="text-center">Tel&eacute;fono</th>
+                                    <th class="text-center">Usuario</th>
                                     <th class="text-center">Acciones</th>
                                 </tr>
                             </thead>
@@ -92,6 +93,7 @@ const nuevo = () => {
                                     <td class="text-center" v-text="emple.numero_documento"></td>
                                     <td class="text-left" v-text="emple.apellidos_nombres"></td>
                                     <td class="text-center" v-text="emple.telefono"></td>
+                                    <td class="text-center" v-text="emple.name"></td>
                                     <td>
                                         <template v-if="emple.es_activo==1">
                                             <button class="btn btn-warning btn-sm mr-1"

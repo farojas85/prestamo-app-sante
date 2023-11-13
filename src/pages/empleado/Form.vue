@@ -13,6 +13,8 @@ const { Toast, soloNumeros } = useHelper();
 
 const { form } = toRefs(props);
 
+const buscandoEmpleado = ref(false);
+
 
 const buscarPersona = ref({
     tipo_documento_id: '',
@@ -21,7 +23,9 @@ const buscarPersona = ref({
 
 const {
     errors, respuesta, tipoDocumentos, sexos, roles, persona,
-    obtenerListaTipoDocumentos, obtenerListaSexos, obtenerListaRoles,
+    departamentos, provincias, distritos,
+    obtenerListaTipoDocumentos, obtenerListaSexos, obtenerListaRoles, obteneListaDepartamentos,
+    obteneListaProvincias, obteneListaDistritos, limpiar,
     buscarDatosDni, agregarEmpleado
 } = useEmpleado();
 
@@ -29,25 +33,36 @@ onMounted(() => {
     obtenerListaTipoDocumentos();
     obtenerListaSexos();
     obtenerListaRoles();
+    obteneListaDepartamentos();
 });
 
 const obtenerPersona = async() => {
+    limpiar();
+    buscandoEmpleado.value = true;
     buscarPersona.value.tipo_documento_id = form.value.tipo_documento_id;
     buscarPersona.value.numero_documento  = form.value.numero_documento;
 
     await buscarDatosDni(buscarPersona.value)
+
     if(errors.value)
     {
         form.value.errors = errors.value
     }
-    // if(persona.value)
-    // {
-    //     form.value.nombres = persona.value.nombres;
-    //     form.value.apellido_paterno = persona.value.apellidoPaterno;
-    //     form.value.apellido_materno = persona.value.apellidoMaterno;
 
+    if(persona.value.numeroDocumento) {
+        form.value.nombres = persona.value.nombres;
+        form.value.apellido_paterno = persona.value.apellidoPaterno;
+        form.value.apellido_materno = persona.value.apellidoMaterno;
+        buscandoEmpleado.value = false
+    }
 
-    // }
+    if(persona.value.numero_documento)
+    {
+        form.value.nombres = persona.value.nombres;
+        form.value.apellido_paterno = persona.value.apellido_paterno;
+        form.value.apellido_materno = persona.value.apellido_materno;
+        buscandoEmpleado.value= false
+    }
 }
 
 const crud = {
@@ -82,10 +97,17 @@ const crud = {
     },
 }
 
+const listarProvincias = async() => {
+    await obteneListaProvincias(form.value.departamento_id);
+}
+
+const listarDistritos = async() => {
+    await obteneListaDistritos(form.value.provincia_id);
+}
+
 const guardar = () => {
     crud[form.value.estado_crud]()
 }
-
 </script>
 <template>
 <form @submit.prevent="guardar">
@@ -125,7 +147,8 @@ const guardar = () => {
                                                 maxlength="15"    v-model="form.numero_documento"
                                                 :class="{ 'is-invalid' : form.errors.numero_documento}" placeholder="Nro. documento de Identidad"
                                                 @keypress="soloNumeros" @change="obtenerPersona"
-                                                />
+                                            />
+                                            <small class="text-primary" v-if="buscandoEmpleado"><i class="fas fa-spinner fa-spin"></i> Buscando nro. documento...</small>
                                             <small class="text-danger" v-for="error in form.errors.numero_documento" :key="error">{{error }}</small>
                                         </div>
                                     </div>
@@ -181,65 +204,117 @@ const guardar = () => {
                                             <small class="text-danger" v-for="error in form.errors.telefono" :key="error">{{error }}</small>
                                         </div>
                                     </div>
-                                    <div class="form-group row">
-                                        <label for="direccion" class="col-form-label col-form-label-sm col-md-3 mb-1">Direcci&oacute;n:</label>
-                                        <div class="col-md-9 mb-1">
-                                            <input type="text" class="form-control form-control-sm" id="direccion"
-                                                v-model="form.direccion"
-                                                :class="{ 'is-invalid' : form.errors.direccion}" placeholder="Ingrese teléfono"
-                                                >
-                                            <small class="text-danger" v-for="error in form.errors.direccion" :key="error">{{error }}</small>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header bg-danger">
-                                    <h4 class="card-title">Datos Usuario</h4>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div class="card-header bg-danger">
+                                            <h4 class="card-title">Datos Ubigeo</h4>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group row">
+                                                <label for="direccion" class="col-form-label col-form-label-sm col-md-3 mb-1">Direcci&oacute;n:</label>
+                                                <div class="col-md-9 mb-1">
+                                                    <textarea
+                                                        class="form-control form-control-sm" id="direccion"
+                                                        v-model="form.direccion"
+                                                        :class="{ 'is-invalid' : form.errors.direccion}" placeholder="Ingrese Dirección"
+                                                        ></textarea>
+                                                    <small class="text-danger" v-for="error in form.errors.direccion" :key="error">{{error }}</small>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="depatamento" class="col-form-label col-form-label-sm col-md-3 mb-1">Departamento:</label>
+                                                <div class="col-md-9 mb-1">
+                                                    <select class="form-control form-control-sm"
+                                                        v-model="form.departamento_id" id="depatamento"
+                                                        :class="{ 'is-invalid' : form.errors.departamento_id}"
+                                                        @change="listarProvincias()">
+                                                        <option value="">-Seleccionar-</option>
+                                                        <option v-for="depa in departamentos" :value="depa.id" >{{ depa.nombre }}</option>
+                                                    </select>
+                                                    <small class="text-danger" v-for="error in form.errors.departamento_id" :key="error">{{error }}</small>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="provincia" class="col-form-label col-form-label-sm col-md-3 mb-1">Provincia:</label>
+                                                <div class="col-md-9 mb-1">
+                                                    <select class="form-control form-control-sm"
+                                                        v-model="form.provincia_id" id="provincia"
+                                                        :class="{ 'is-invalid' : form.errors.provincia_id}"
+                                                        @change="listarDistritos">
+                                                        <option value="">-Seleccionar-</option>
+                                                        <option v-for="prov in provincias" :value="prov.id" >{{ prov.nombre }}</option>
+                                                    </select>
+                                                    <small class="text-danger" v-for="error in form.errors.provincia_id" :key="error">{{error }}</small>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="distrito" class="col-form-label col-form-label-sm col-md-3 mb-1">Distrito:</label>
+                                                <div class="col-md-9 mb-1">
+                                                    <select class="form-control form-control-sm"
+                                                        v-model="form.distrito_id" id="distrito"
+                                                        :class="{ 'is-invalid' : form.errors.distrito_id}">
+                                                        <option value="">-Seleccionar-</option>
+                                                        <option v-for="dist in distritos" :value="dist.id" >{{ dist.nombre }}</option>
+                                                    </select>
+                                                    <small class="text-danger" v-for="error in form.errors.distrito_id" :key="error">{{error }}</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="card-body">
-                                    <div class="form-group row">
-                                        <label for="name" class="col-form-label col-form-label-sm col-md-3 mb-1">Nombre Usuario:</label>
-                                        <div class="col-md-9 mb-1">
-                                            <input type="text" class="form-control form-control-sm" id="name"
-                                                v-model="form.name"
-                                                :class="{ 'is-invalid' : form.errors.name}" placeholder="Ingrese Usuario"
-                                                >
-                                            <small class="text-danger" v-for="error in form.errors.name" :key="error">{{error }}</small>
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div class="card-header bg-warning">
+                                            <h4 class="card-title">Datos Usuario</h4>
                                         </div>
-                                    </div>
-                                    <div class="form-group row">
-                                        <label for="email" class="col-form-label col-form-label-sm col-md-3 mb-1">Correo Elect.:</label>
-                                        <div class="col-md-9 mb-1">
-                                            <input type="email" class="form-control form-control-sm" id="email"
-                                                v-model="form.email"
-                                                :class="{ 'is-invalid' : form.errors.email}" placeholder="Ingrese Correo Electrónico"
-                                                >
-                                            <small class="text-danger" v-for="error in form.errors.email" :key="error">{{error }}</small>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row">
-                                        <label for="role" class="col-form-label col-form-label-sm col-md-3 mb-1">Rol:</label>
-                                        <div class="col-md-9 mb-1">
-                                            <select class="form-control form-control-sm"
-                                                v-model="form.role_id" id="role"
-                                                :class="{ 'is-invalid' : form.errors.role_id}">
-                                                <option value="">-Seleccionar-</option>
-                                                <option v-for="rol in roles" :value="rol.id" >{{ rol.nombre }}</option>
-                                            </select>
-                                            <small class="text-danger" v-for="error in form.errors.role_id" :key="error">{{error }}</small>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row" v-if="form.estado_crud=='nuevo'">
-                                        <label for="password" class="col-form-label col-form-label-sm col-md-3 mb-1">Contrase&ntilde;a:</label>
-                                        <div class="col-md-9 mb-1">
-                                            <input type="password" class="form-control form-control-sm" id="password"
-                                                v-model="form.password"
-                                                :class="{ 'is-invalid' : form.errors.password}" placeholder="Ingrese Contraseña"
-                                                >
-                                            <small class="text-danger" v-for="error in form.errors.password" :key="error">{{error }}</small>
+                                        <div class="card-body">
+                                            <!-- <div class="form-group row">
+                                                <label for="name" class="col-form-label col-form-label-sm col-md-3 mb-1">Nombre Usuario:</label>
+                                                <div class="col-md-9 mb-1">
+                                                    <input type="text" class="form-control form-control-sm" id="name"
+                                                        v-model="form.name"
+                                                        :class="{ 'is-invalid' : form.errors.name}" placeholder="Ingrese Usuario"
+                                                        >
+                                                    <small class="text-danger" v-for="error in form.errors.name" :key="error">{{error }}</small>
+                                                </div>
+                                            </div> -->
+                                            <div class="form-group row">
+                                                <label for="email" class="col-form-label col-form-label-sm col-md-3 mb-1">Correo Elect.:</label>
+                                                <div class="col-md-9 mb-1">
+                                                    <input type="email" class="form-control form-control-sm" id="email"
+                                                        v-model="form.email"
+                                                        :class="{ 'is-invalid' : form.errors.email}" placeholder="Ingrese Correo Electrónico"
+                                                        >
+                                                    <small class="text-danger" v-for="error in form.errors.email" :key="error">{{error }}</small>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="role" class="col-form-label col-form-label-sm col-md-3 mb-1">Rol:</label>
+                                                <div class="col-md-9 mb-1">
+                                                    <select class="form-control form-control-sm"
+                                                        v-model="form.role_id" id="role"
+                                                        :class="{ 'is-invalid' : form.errors.role_id}">
+                                                        <option value="">-Seleccionar-</option>
+                                                        <option v-for="rol in roles" :value="rol.id" >{{ rol.nombre }}</option>
+                                                    </select>
+                                                    <small class="text-danger" v-for="error in form.errors.role_id" :key="error">{{error }}</small>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row" v-if="form.estado_crud=='nuevo'">
+                                                <label for="password" class="col-form-label col-form-label-sm col-md-3 mb-1">Contrase&ntilde;a:</label>
+                                                <div class="col-md-9 mb-1">
+                                                    <input type="password" class="form-control form-control-sm" id="password"
+                                                        v-model="form.password"
+                                                        :class="{ 'is-invalid' : form.errors.password}" placeholder="Ingrese Contraseña"
+                                                        >
+                                                    <small class="text-danger" v-for="error in form.errors.password" :key="error">{{error }}</small>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

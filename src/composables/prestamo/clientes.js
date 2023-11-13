@@ -13,7 +13,10 @@ export const useCliente = () => {
     const tipoDocumentos = ref([]);
     const sexos = ref([]);
     const persona = ref({});
-
+    const departamentos = ref([]);
+    const provincias = ref([]);
+    const distritos = ref([]);
+ 
     const dato = ref({
         page: 1,
         paginacion: 10,
@@ -161,6 +164,48 @@ export const useCliente = () => {
         }
     }
 
+    const obteneListaDepartamentos = async() => {
+        let respond = await prestamoApi.get('/api/departamentos/list',config)
+
+        if(respond.status == 404)
+        {
+            errors.value = respond.data.error
+        }
+
+        if(respond.status == 200)
+        {
+            departamentos.value = jwtDecode(respond.data).departamentos
+        }
+    }
+
+    const obteneListaProvincias = async(data) => {
+        let respond = await prestamoApi.get('/api/provincias/por-departamento?departamento_id='+data,config)
+
+        if(respond.status == 404)
+        {
+            errors.value = respond.data.error
+        }
+
+        if(respond.status == 200)
+        {
+            provincias.value = jwtDecode(respond.data).provincias
+        }
+    }
+
+    const obteneListaDistritos = async(data) => {
+        let respond = await prestamoApi.get('/api/distritos/por-provincia?provincia_id='+data,config)
+
+        if(respond.status == 404)
+        {
+            errors.value = respond.data.error
+        }
+
+        if(respond.status == 200)
+        {
+            distritos.value = jwtDecode(respond.data).distritos
+        }
+    }
+
     const agregarCliente = async(data) => {
         errors.value = [];
         respuesta.value = []
@@ -183,11 +228,14 @@ export const useCliente = () => {
         }
     }
 
+
     
     return {
         errors, respuesta, cliente, clientes, dato, form, tipoDocumentos, sexos, persona,
+        departamentos, provincias, distritos,
         listar, obtenerClientes, buscar, isActived, pagesNumber,
         cambiarPagina, cambiarPaginacion, limpiar, obtenerListaTipoDocumentos, obtenerListaSexos,
+        obteneListaDepartamentos, obteneListaProvincias, obteneListaDistritos,
         buscarDatosDni, agregarCliente
     }
 

@@ -14,6 +14,9 @@ export const useEmpleado = () => {
     const sexos = ref([]);
     const roles = ref([]);
     const persona = ref({});
+    const departamentos = ref([]);
+    const provincias = ref([]);
+    const distritos = ref([]);
 
     const dato = ref({
         page: 1,
@@ -39,6 +42,9 @@ export const useEmpleado = () => {
         persona_id:'',
         user_id:'',
         es_activo:1,
+        departamento_id:"",
+        provincia_id:'',
+        distrito_id:'',
         estado_crud:'',
         errors:[]
     });
@@ -61,6 +67,9 @@ export const useEmpleado = () => {
         form.value.persona_id='';
         form.value.user_id='';
         form.value.es_activo=1;
+        form.value.departamento_id="";
+        form.value.provincia_id="";
+        form.value.distrito_id="";
         form.value.estado_crud='';
         form.value.errors = [];
         errors.value = [];
@@ -168,15 +177,53 @@ export const useEmpleado = () => {
         }
     }
 
+    const obteneListaDepartamentos = async() => {
+        let respond = await prestamoApi.get('/api/departamentos/list',config)
+
+        if(respond.status == 404)
+        {
+            errors.value = respond.data.error
+        }
+
+        if(respond.status == 200)
+        {
+            departamentos.value = jwtDecode(respond.data).departamentos
+        }
+    }
+
+    const obteneListaProvincias = async(data) => {
+        let respond = await prestamoApi.get('/api/provincias/por-departamento?departamento_id='+data,config)
+
+        if(respond.status == 404)
+        {
+            errors.value = respond.data.error
+        }
+
+        if(respond.status == 200)
+        {
+            provincias.value = jwtDecode(respond.data).provincias
+        }
+    }
+
+    const obteneListaDistritos = async(data) => {
+        let respond = await prestamoApi.get('/api/distritos/por-provincia?provincia_id='+data,config)
+
+        if(respond.status == 404)
+        {
+            errors.value = respond.data.error
+        }
+
+        if(respond.status == 200)
+        {
+            distritos.value = jwtDecode(respond.data).distritos
+        }
+    }
+
     const buscarDatosDni = async(data) => {
         try {
             
-            let respond = await prestamoApi.get('/api/personas/dni/'+data.numero_documento+'/?tipo_documento_id='+data.tipo_documento_id, config)
-            if(respond.status == 200)
-            {
-                //persona.value = jwtDecode(respond.data).personaDni;
-                persona.value = respond.data.personaDni;
-            }
+            let respond = await prestamoApi.get('/api/personas/dni?numero_documento='+data.numero_documento+'&tipo_documento_id='+data.tipo_documento_id, config)
+            persona.value = JSON.parse(jwtDecode(respond.data).personaDni);
         } catch (error) {
             errors.value = [];
             if(error.response.status === 422) {
@@ -187,7 +234,9 @@ export const useEmpleado = () => {
                 errors.value = respond.data.error
             }
         }
+    }
 
+    const generarUsuario = async() => {
 
     }
 
@@ -215,8 +264,10 @@ export const useEmpleado = () => {
     
     return {
         errors, respuesta, empleado, empleados, dato, form, tipoDocumentos, sexos,roles, persona,
+        departamentos, provincias, distritos,
         listar, obtenerEmpleados, buscar, isActived, pagesNumber,
         cambiarPagina, cambiarPaginacion, limpiar, obtenerListaTipoDocumentos, obtenerListaSexos,
+        obteneListaDepartamentos, obteneListaProvincias, obteneListaDistritos,
         obtenerListaRoles, buscarDatosDni, agregarEmpleado
     }
 

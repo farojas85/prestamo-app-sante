@@ -2,7 +2,9 @@
 import { ref, toRefs } from 'vue';
 import PrestamoFrom from './forms/PrestamoForm.vue';
 import { usePrestamo } from '../../composables/prestamo/prestamos';
+import { useDatosSession } from '../../composables/session';
 
+const { usuario, roles} = useDatosSession();
 const cardTitle = ref('Nuevo Préstamo');
 
 const { 
@@ -22,6 +24,8 @@ const cambiarCrud = (crud) => {
 const nuevo = (crud) => {
     limpiar();
     form.value.estado_crud = crud
+    form.value.user_id = usuario.value.id
+    form.value.role = roles.value.slug
     cardTitle.value = 'Nuevo Préstamo'
 }
 

@@ -2,7 +2,6 @@ import { ref } from "vue";
 import { jwtDecode } from 'jwt-decode';
 import { prestamoApi } from "../../api";
 import { getConfigHeader, getdataParamsPagination, getConfigHeaderPost, getdataParamsPaginationByUser } from "../../helpers";
-// import { useDatosSession } from "../session";
 
 export const usePrestamo = () => {
     const errors = ref([]);
@@ -29,6 +28,7 @@ export const usePrestamo = () => {
         cliente_id:'',
         fecha_prestamo:'',
         user_id:'',
+        role:'',
         frecuencia_pago_id:1,
         capital_inicial:0,
         aplicacion_interes_id:2,
@@ -196,12 +196,35 @@ export const usePrestamo = () => {
             // }
         }
     }
+
+    const agregrarPrestamo = async(data) => {
+        errors.value = [];
+        respuesta.value = []
+        try {
+            let respond = await prestamoApi.post('/api/prestamos',data,configPost);
+
+            respond = jwtDecode(respond.data)
+            errors.value = []
+            if(respond.ok==1)
+            {
+                respuesta.value = respond
+                persona.value = respond.data
+            }
+
+        } catch (error) {
+            errors.value = [];
+            if(error.response.status === 422) {
+                errors.value = error.response.data.errors
+            }
+        }
+    }
     
     return {
         errors, respuesta, prestamos, dato, form, frecuenciaPagos, aplicacionIntereses, persona,
         listar, buscar, isActived, pagesNumber,
         cambiarPagina, cambiarPaginacion, limpiar,
-        obtenerListaFrecuenciaPagos, obtenerListaAplicacionInrtereses, buscarClienteExiste
+        obtenerListaFrecuenciaPagos, obtenerListaAplicacionInrtereses, buscarClienteExiste,
+        agregrarPrestamo
     }
 
 }

@@ -3,6 +3,9 @@ import { toRefs, onMounted, ref, computed } from 'vue';
 import ClienteForm from './ClienteForm.vue';
 import { useHelper } from '../../../helpers';
 import {usePrestamo } from '../../../composables/prestamo/prestamos';
+import { useDatosSession } from '../../../composables/session';
+
+
 
 
 const { soloNumeros } = useHelper();
@@ -35,13 +38,17 @@ const clienteFrm = ref({
     direccion:'',
     correo_personal:'',
     es_activo:1,
+    departamento_id:'',
+    provincia_id:'',
+    distrito_id:'',
     errors:[],
     estado_crud:''
 });
 
 const {
     frecuenciaPagos,aplicacionIntereses, persona,
-    obtenerListaFrecuenciaPagos, obtenerListaAplicacionInrtereses, buscarClienteExiste
+    obtenerListaFrecuenciaPagos, obtenerListaAplicacionInrtereses, buscarClienteExiste,
+    agregrarPrestamo
 } = usePrestamo();
 
 
@@ -109,8 +116,40 @@ const buscaExisteCliente = async() => {
     }
 }
 
-const guardar = async() => {
+const crud = {
+    'nuevo': async() => {
 
+        form.value.errors = [];
+        await agregrarPrestamo(form.value);
+
+        if(errors.value) form.value.errors = errors.value;
+
+        if(respuesta.value.ok==1)
+        {
+            form.value.errors = [];
+            Toast.fire({icon:'success', title:respuesta.value.mensaje})
+            $('#modal-frecuencia-pago').modal('hide')
+            emit('onListar')
+        }
+    },
+    'editar': async() => {
+        form.value.errors = [];
+        await actualizarFrecuenciaPago(form.value);
+
+        if(errors.value) form.value.errors = errors.value;
+
+        if(respuesta.value.ok==1)
+        {
+            form.value.errors = [];
+            Toast.fire({icon:'success', title:respuesta.value.mensaje})
+            $('#modal-frecuencia-pago').modal('hide')
+            emit('onListar')
+        }
+    },
+}
+
+const guardar = async() => {
+    crud[form.value.estado_crud]()
 }
 
 </script>
@@ -304,7 +343,7 @@ const guardar = async() => {
             <div class="row">
                 <div class="col-md-12 text-center">
                     <span v-if="form.estado_crud!='mostrar'">
-                        <button type="submit" class="btn btn-success">
+                        <button type="submit" class="btn btn-success" @click.prevent="guardar">
                             <span v-if="form.estado_crud=='nuevo'"><i class="fas fa-save"></i> Guardar</span>
                             <span v-else-if="form.estado_crud=='editar'"><i class="fas fa-sync-alt"></i> Actualizar</span>
                         </button>
@@ -316,7 +355,7 @@ const guardar = async() => {
     <div class="row">
         <div class="col-md-12">
             <div class="modal fade" id="modal-cliente-form">
-                <div class="modal-dialog">
+                <div class="modal-dialog modal-xl">
                     <div class="modal-content">
                     <div class="modal-header bg-info">
                         <h4 class="modal-title" id="modal-cliente-form-title">Default Modal</h4>
