@@ -1,5 +1,6 @@
 import { ref } from "vue";
 import { jwtDecode } from 'jwt-decode';
+import { jsPDF } from 'jspdf';
 import { prestamoApi } from "../../api";
 import { getConfigHeader, getdataParamsPagination, getConfigHeaderPost } from "../../helpers";
 
@@ -17,6 +18,8 @@ export const useEmpleado = () => {
     const departamentos = ref([]);
     const provincias = ref([]);
     const distritos = ref([]);
+    const superiores = ref([]);
+
 
     const dato = ref({
         page: 1,
@@ -45,6 +48,10 @@ export const useEmpleado = () => {
         departamento_id:"",
         provincia_id:'',
         distrito_id:'',
+        superior_id:'',
+        departamentos:[],
+        provincias:[],
+        distritos:[],
         estado_crud:'',
         errors:[]
     });
@@ -70,6 +77,10 @@ export const useEmpleado = () => {
         form.value.departamento_id="";
         form.value.provincia_id="";
         form.value.distrito_id="";
+        form.value.superior_id="";  
+        form.value.distritos = [];
+        form.value.provincias = [];
+        form.value.departamentos = [];
         form.value.estado_crud='';
         form.value.errors = [];
         errors.value = [];
@@ -201,7 +212,7 @@ export const useEmpleado = () => {
 
         if(respond.status == 200)
         {
-            provincias.value = jwtDecode(respond.data).provincias
+            form.value.provincias = jwtDecode(respond.data).provincias
         }
     }
 
@@ -215,7 +226,21 @@ export const useEmpleado = () => {
 
         if(respond.status == 200)
         {
-            distritos.value = jwtDecode(respond.data).distritos
+            form.value.distritos = jwtDecode(respond.data).distritos
+        }
+    }
+
+    const obtenerListaSuperioresPorRole = async(data) => {
+        let respond = await prestamoApi.get('/api/empleados/superiores-por-role?role='+data,config)
+
+        if(respond.status == 404)
+        {
+            errors.value = respond.data.error
+        }
+
+        if(respond.status == 200)
+        {
+            superiores.value = jwtDecode(respond.data).superiores
         }
     }
 
@@ -234,6 +259,13 @@ export const useEmpleado = () => {
                 errors.value = respond.data.error
             }
         }
+    }
+
+    const obtenerEmpleado = async(id) => {
+
+        let respond = await prestamoApi.get('/api/empleados/show?id='+id,config);
+
+        empleado.value = jwtDecode(respond.data).empleado
     }
 
     const generarUsuario = async() => {
@@ -261,14 +293,85 @@ export const useEmpleado = () => {
         }
     }
 
+    const actualizarEmpleado= async(data) => {
+        errors.value = ''
+        try {
+            let responded = await prestamoApi.put('api/empleados/'+data.id,data,configPost)
+            responded = jwtDecode(responded.data)
+            errors.value =''
+            if(responded.ok==1){
+                respuesta.value=responded
+            }
+
+        } catch (error) {
+            errors.value=""
+            if(error.response.status === 422) {
+                errors.value = error.response.data.errors
+            }
+        }
+    }
+
+    const inhabilitarEmpleado = async(id) => {
+        errors.value = ''
+        try {
+            let responded = await prestamoApi.put('api/empleados/'+id+'/disable',null,configPost)
+            errors.value =''
+            responded = jwtDecode(responded.data)
+            if(responded.ok==1){
+                respuesta.value=responded
+            }
+
+        } catch (error) {
+            errors.value=""
+            if(error.response.status === 422) {
+                errors.value = error.response.data.errors
+            }
+        }
+    }
+
+    const habilitarEmpleado = async(id) => {
+        errors.value = ''
+        try {
+            let responded = await prestamoApi.put('api/empleados/'+id+'/enable',null,configPost)
+            errors.value =''
+            responded = jwtDecode(responded.data)
+            if(responded.ok==1){
+                respuesta.value=responded
+            }
+
+        } catch (error) {
+            errors.value=""
+            if(error.response.status === 422) {
+                errors.value = error.response.data.errors
+            }
+        }
+    }
+
+    const imprimirContratoEmpleado = async( id) => {
+        const doc = new jsPDF({
+            orientation: "p",
+            unit: "mm",
+            format: "a4"
+        });
+        //var imgData = 'data:image/webp;base64,'+ Base64.encode('/Koala.jpeg');
+        doc.addImage('/img/logos/logo-1.png','PNG',5,5,30,10);
+        doc.setFontSize(16).setFont("times","normal","bold").text('CONTRATO DE TRABAJO',60,30)
+        doc.save('contrato.pdf');
+
+    }
+
+    const subirContrato = async(id) {
+        
+    }
     
     return {
         errors, respuesta, empleado, empleados, dato, form, tipoDocumentos, sexos,roles, persona,
-        departamentos, provincias, distritos,
+        departamentos, provincias, distritos, superiores,
         listar, obtenerEmpleados, buscar, isActived, pagesNumber,
         cambiarPagina, cambiarPaginacion, limpiar, obtenerListaTipoDocumentos, obtenerListaSexos,
-        obteneListaDepartamentos, obteneListaProvincias, obteneListaDistritos,
-        obtenerListaRoles, buscarDatosDni, agregarEmpleado
+        obteneListaDepartamentos, obteneListaProvincias, obteneListaDistritos, obtenerListaSuperioresPorRole,
+        obtenerEmpleado,obtenerListaRoles, buscarDatosDni, agregarEmpleado, actualizarEmpleado,
+        habilitarEmpleado, inhabilitarEmpleado, imprimirContratoEmpleado
     }
 
 }
