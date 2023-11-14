@@ -360,7 +360,7 @@ export const useEmpleado = () => {
 
     }
 
-    const subirContrato = async(id) {
+    const subirContrato = async(id) => {
         
     }
     
