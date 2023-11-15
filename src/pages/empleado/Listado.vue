@@ -144,6 +144,32 @@ const habilitar = (id) => {
 const imprimirContrato = async (id) => {
     await imprimirContratoEmpleado(id);
 }
+
+const SubirContrato = async (id) => {
+    const { value: file } = await Swal.fire({
+        title: "Subir Contrato",
+        input: "file",
+        inputAttributes: {
+            "accept": "pdf/*",
+            "aria-label": "Subir contrato"
+        }
+    });
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            Swal.fire({
+            title: "Your uploaded picture",
+            imageUrl: e.target.result,
+            imageAlt: "The uploaded picture"
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+}
+const enviarNotificacion = async(numero_documento) => {
+
+}
 </script>
 <template>
     <div class="card card-primary card-outline">
@@ -235,6 +261,11 @@ const imprimirContrato = async (id) => {
                                                 @click.prevent="imprimirContrato(emple.id)">
                                                 <i class="fas fa-print"></i>
                                             </button>
+                                            <button class="btn bg-orange btn-sm mr-1"
+                                                title="Subir Contrato"
+                                                @click.prevent="SubirContrato(emple.id)">
+                                                <i class="fas fa-upload"></i>
+                                            </button>
                                             <button class="btn btn-secondary btn-sm mr-1"
                                                 title="Inhabilitar Empleado"
                                                 @click.prevent="inhabilitar(emple.id)">
@@ -247,6 +278,11 @@ const imprimirContrato = async (id) => {
                                             @click.prevent="habilitar(emple.id)" v-if="emple.es_activo==0">
                                             <i class="fas fa-check"></i>
                                         </button>
+                                        <!-- <button class="btn btn-success btn-sm mr-1"
+                                            title="Enviar Notificaciń"
+                                            @click.prevent="enviarNotificacion(emple.telefono)">
+                                            <i class="fab fa-whatsapp"></i>
+                                        </button> -->
                                     </td>
                                 </tr>
                             </tbody>

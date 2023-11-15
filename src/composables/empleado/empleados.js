@@ -348,14 +348,69 @@ export const useEmpleado = () => {
     }
 
     const imprimirContratoEmpleado = async( id) => {
-        const doc = new jsPDF({
-            orientation: "p",
-            unit: "mm",
-            format: "a4"
-        });
-        //var imgData = 'data:image/webp;base64,'+ Base64.encode('/Koala.jpeg');
-        doc.addImage('/img/logos/logo-1.png','PNG',5,5,30,10);
-        doc.setFontSize(16).setFont("times","normal","bold").text('CONTRATO DE TRABAJO',60,30)
+        await obtenerEmpleado(id);
+
+        let persona = empleado.value.persona;
+        let apellidos_nombres = (persona.apellido_paterno+' '+persona.apellido_materno+' '+persona.nombres) ?? "";
+        let dni = persona.numero_documento ?? "";
+        let direccion = persona.direccion ?? "";
+        let role = (empleado.value.role).nombre ?? "";
+
+        const doc = new jsPDF({ orientation: "p", unit: "mm", format: "a4" });
+        
+        doc.addImage('/img/logos/logo-1.png','PNG',5,5,50,15);
+        doc.setFontSize(16).setFont("arial","normal","bold").text('CONTRATO DE TRABAJO',70,30)
+
+        doc.setFontSize(11).setFont('arial','normal','').text("Conste el presente documento que se expide, el Contrato de Trabajo a Plazo Determinado, que",30,40)
+        doc.setFontSize(11).setFont('arial','normal','').text("celebran de una parte",30,45)
+        doc.setFontSize(11).setFont('arial','normal','bold').text("INVERSIONES SANTÉ",64,45)
+        doc.setFontSize(11).setFont('arial','normal','').text(", con RUC",105,45)
+        doc.setFontSize(11).setFont('arial','normal','bold').text("N° 20441805960",123,45)
+        doc.setFontSize(11).setFont('arial','normal','').text("representado por",151,45)
+        doc.setFontSize(11).setFont('arial','normal','').text("su apoderado",30,50)
+        doc.setFontSize(11).setFont('arial','normal','bold').text("JORQUIERA DE LOS RIOS MARCO ANTONIO RAUL,",53,50)
+        doc.setFontSize(11).setFont('arial','normal','').text("identificado con",152,50)
+        doc.setFontSize(11).setFont('arial','normal','bold').text("DNI N° 00010001,",30,55)
+        doc.setFontSize(11).setFont('arial','normal','').text("denominado en adelante,",62,55)
+        doc.setFontSize(11).setFont('arial','normal','bold').text("EL EMPLEADOR;",103,55)
+        doc.setFontSize(11).setFont('arial','normal','').text("y de la otra parte don(ña)",138,55)
+        doc.setLineDash([1, 0.5], 0).line(30, 61, 127, 61);
+        doc.setFontSize(11).setFont('arial','normal','bold').text(apellidos_nombres,35,60)
+        doc.setFontSize(11).setFont('arial','normal','').text(",  identificado con D.N.I Nro",129,60)
+        doc.setLineDash([1, 0.5], 0).line(30, 66, 50, 66);
+        doc.setFontSize(11).setFont('arial','normal','bold').text(dni,32,65)
+        doc.setFontSize(11).setFont('arial','normal','').text(", domiciliado en ",52,65)
+        doc.setLineDash([1, 0.5], 0).line(78, 66, 177, 66);
+        doc.setFontSize(11).setFont('arial','normal','bold').text(direccion,80,65)
+        doc.setFontSize(11).setFont('arial','normal','').text("en adelante se le denomirá ",30,70)
+        doc.setFontSize(11).setFont('arial','normal','bold').text("EL TRABAJADOR;",73,70)
+        doc.setFontSize(11).setFont('arial','normal','').text("bajo los términos y condiciones siguientes:",108,70)
+
+        doc.setFontSize(11).setFont('arial','normal','bold').text("PRIMERO:",30,80)
+        doc.setLineDash([1, 0], 0).line(30, 81, 50, 81);
+        doc.setFontSize(11).setFont('arial','normal','').text("El trabajador se compromete a asumir el cargo de",52,80)
+        doc.setLineDash([1, 0.5], 0).line(130, 81, 156, 81);
+        doc.setFontSize(11).setFont('arial','normal','bold').text(role,131,80)
+        doc.setFontSize(11).setFont('arial','normal','').text("de la empresa,",157,80)
+        doc.setFontSize(11).setFont('arial','normal','').text("asumiendo las funciones de gestión de clientes, realizar préstamos, emisión y revisión de pagos,",30,85)
+        doc.setFontSize(11).setFont('arial','normal','').text("y toda otra labor relacionada que le encarge EL EMPLEADOR, teniendo bajo su responsabilidad",30,90)
+        doc.setFontSize(11).setFont('arial','normal','').text("cada préstamo y pago que lo emita.",30,95)
+
+        doc.setFontSize(11).setFont('arial','normal','bold').text("SEGUNDO:",30,105)
+        doc.setLineDash([1, 0], 0).line(30, 106, 50, 106);
+        doc.setFontSize(11).setFont('arial','normal','').text("La jornada de trabajo será: de lunes a viernes de mañana 08:00 am a 01:00 pm, ",52,105)
+        doc.setFontSize(11).setFont('arial','normal','').text("tarde de 02:00 pm a 05:00 pm, y los sábados de 08:00 am a 01:00 pm. ",30,110)
+        doc.setFontSize(11).setFont('arial','normal','').text("La jornada laboral será ininterrumpida por un descanso de 60 mintuos destinados a refrigerio",30,115)
+
+
+        doc.addImage('/img/logos/firma.png','PNG',35,152,60,30);
+        doc.setLineDash([1, 0], 0).line(40, 180, 90, 180);
+        doc.setFontSize(11).setFont('arial','normal','bold').text("EL EMPLEADOR",50,184)
+
+        doc.setLineDash([1, 0], 0).line(115, 180, 180, 180);
+        doc.setFontSize(11).setFont('arial','normal','bold').text(apellidos_nombres,118,184)
+        doc.setFontSize(11).setFont('arial','normal','bold').text("DNI: "+dni,132,188)
+        
         doc.save('contrato.pdf');
 
     }
