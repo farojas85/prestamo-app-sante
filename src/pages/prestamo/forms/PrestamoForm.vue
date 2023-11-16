@@ -8,7 +8,7 @@ import { useDatosSession } from '../../../composables/session';
 
 
 
-const { soloNumeros } = useHelper();
+const { soloNumeros, Toast } = useHelper();
 
 const props = defineProps({
     form: Object,
@@ -46,9 +46,9 @@ const clienteFrm = ref({
 });
 
 const {
-    frecuenciaPagos,aplicacionIntereses, persona,
+    frecuenciaPagos,aplicacionIntereses, persona, errors, respuesta,
     obtenerListaFrecuenciaPagos, obtenerListaAplicacionInrtereses, buscarClienteExiste,
-    agregrarPrestamo
+    obtenerValorInteres,agregrarPrestamo
 } = usePrestamo();
 
 
@@ -60,14 +60,14 @@ onMounted(() => {
 
 
 form.value.total = computed(() => {
-    return Math.round(parseFloat(form.value.capital_inicial)*( 1 + (parseFloat(form.value.interes)/100) ),2).toFixed(2) ;
+    return (Math.round( (parseFloat(form.value.capital_inicial)*( 1 + (parseFloat(form.value.interes)/100)))*100 )/100).toFixed(2) ;
 });
 
 form.value.valor_cuota = computed(() => {
     if(form.value.numero_cuotas <= 0 )  {
         return Math.round(parseFloat(form.value.total)).toFixed(2);
     }
-    return Math.round(parseFloat(form.value.total) / form.value.numero_cuotas,2).toFixed(2);
+    return (Math.round((parseFloat(form.value.total) / parseFloat(form.value.numero_cuotas))*100)/100).toFixed(2);
 })
 
 
@@ -100,14 +100,17 @@ const buscaExisteCliente = async() => {
     limpiarCliente();
 
     await buscarClienteExiste(buscarDni.value)
+
     if(persona.value)
     {
-        clienteFrm.value
+
+        clienteFrm.value.id = persona.value.id
         clienteFrm.value.numero_documento = persona.value.numero_documento;
         clienteFrm.value.nombres = persona.value.nombres;
         clienteFrm.value.apellido_paterno = persona.value.apellido_paterno;
         clienteFrm.value.apellido_materno = persona.value.apellido_materno;
         clienteFrm.value.direccion = persona.value.direccion;
+        form.value.cliente_id = persona.value.id
     }
 
     if(!persona.value)
@@ -116,6 +119,15 @@ const buscaExisteCliente = async() => {
     }
 }
 
+const valorInteres = () => {
+    if(form.value.frecuencia_pago_id!= "")
+    {
+        let frecuencia = frecuenciaPagos.value.find(f => f.id === form.value.frecuencia_pago_id)
+        console.log(frecuencia)
+        form.value.interes = parseFloat(frecuencia.valor_interes).toFixed(2)
+        //form.value.interes = (frecuenciaPagos.value.find(f => f.id === form.value.frecuencia_pago_id)).valor_interess
+    }
+}
 const crud = {
     'nuevo': async() => {
 
@@ -128,7 +140,7 @@ const crud = {
         {
             form.value.errors = [];
             Toast.fire({icon:'success', title:respuesta.value.mensaje})
-            $('#modal-frecuencia-pago').modal('hide')
+            form.value.estado_crud =''
             emit('onListar')
         }
     },
@@ -239,7 +251,8 @@ const guardar = async() => {
                                         <div class="row">
                                             <label for="frecuencia_pago_id" class="col-form-label col-form-label-sm col-md-3">Frecuencia Pago</label>
                                             <div class="col-md-9">
-                                                <select class="form-control form-control-sm" v-model="form.frecuencia_pago_id">
+                                                <select class="form-control form-control-sm" v-model="form.frecuencia_pago_id"
+                                                    @change="valorInteres">
                                                     <option value="">-SELECCIONAR-</option>
                                                     <option v-for="moneda in frecuenciaPagos" :key="moneda.id" :value="moneda.id"
                                                             v-text="moneda.nombre"></option>

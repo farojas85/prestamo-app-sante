@@ -2,13 +2,14 @@ import { ref } from "vue";
 import { jwtDecode } from 'jwt-decode';
 import { jsPDF } from 'jspdf';
 import { prestamoApi } from "../../api";
-import { getConfigHeader, getdataParamsPagination, getConfigHeaderPost } from "../../helpers";
+import { getConfigHeader, getdataParamsPagination, getConfigHeaderPost, getConfigHeaderUpload } from "../../helpers";
 
 export const useEmpleado = () => {
     const errors = ref([]);
     const respuesta = ref([]);
     const config = getConfigHeader();
     const configPost = getConfigHeaderPost();
+    const configUploadPost = getConfigHeaderUpload();
     const empleado = ref({});
     const empleados = ref([]);
     const tipoDocumentos = ref([]);
@@ -415,8 +416,34 @@ export const useEmpleado = () => {
 
     }
 
-    const subirContrato = async(id) => {
-        
+    const subirContratoEmpleado = async(data) => {
+        errors.value = []
+        try {
+            let responded = await prestamoApi.post('api/empleados/subir-contrato',data,configUploadPost);
+
+            errors.value =''
+            responded = jwtDecode(responded.data)
+            if(responded.ok==1){
+                respuesta.value=responded
+            }
+            
+        } catch (error) {
+            errors.value=""
+            if(error.response.status === 422) {
+                errors.value = error.response.data.errors
+            }
+        }
+    }
+
+    const verContratoEmpleado = async(id) => {
+        let emple = empleados.value.data.find(e => e.id === id);
+        if(emple)
+        {
+            let contrato_empleado = emple.contrato_pdf;
+            let dni_empleado = emple.numero_documento;
+            let url = import.meta.env.VITE_APP_API_URL+"/storage/empleados/"+dni_empleado+'/'+contrato_empleado;
+            window.open(url,'_blank')
+        }
     }
     
     return {
@@ -426,7 +453,8 @@ export const useEmpleado = () => {
         cambiarPagina, cambiarPaginacion, limpiar, obtenerListaTipoDocumentos, obtenerListaSexos,
         obteneListaDepartamentos, obteneListaProvincias, obteneListaDistritos, obtenerListaSuperioresPorRole,
         obtenerEmpleado,obtenerListaRoles, buscarDatosDni, agregarEmpleado, actualizarEmpleado,
-        habilitarEmpleado, inhabilitarEmpleado, imprimirContratoEmpleado
+        habilitarEmpleado, inhabilitarEmpleado, imprimirContratoEmpleado,subirContratoEmpleado,
+        verContratoEmpleado
     }
 
 }

@@ -47,7 +47,7 @@ export const useAplicacionMora = () => {
 
         if(respond.status == 200)
         {
-            aplicacionMoras.value = { jwtDecode }(respond.data).aplicacion_moras;
+            aplicacionMoras.value = jwtDecode(respond.data).aplicacion_moras;
         }
     }
 
@@ -100,7 +100,7 @@ export const useAplicacionMora = () => {
         try {
             let respond = await prestamoApi.post('/api/aplicacion-moras',data,configPost);
 
-            respond = { jwtDecode }(respond.data)
+            respond = jwtDecode(respond.data)
             console.log(respond)
             errors.value = []
             if(respond.ok==1)
@@ -126,7 +126,7 @@ export const useAplicacionMora = () => {
 
         if(respond.status == 200)
         {
-            aplicacionMora.value = { jwtDecode }(respond.data).aplicacion_mora
+            aplicacionMora.value = jwtDecode(respond.data).aplicacion_mora
         }
     }
 
@@ -134,7 +134,7 @@ export const useAplicacionMora = () => {
         errors.value = ''
         try {
             let responded = await prestamoApi.put('api/aplicacion-moras/'+data.id,data,configPost)
-            responded = { jwtDecode }(responded.data)
+            responded = jwtDecode(responded.data)
             errors.value =''
             if(responded.ok==1){
                 respuesta.value=responded
@@ -170,7 +170,7 @@ export const useAplicacionMora = () => {
         try {
             let responded = await prestamoApi.put('api/aplicacion-moras/'+id+'/disable',null,configPost)
             errors.value =''
-            responded = { jwtDecode }(responded.data)
+            responded = jwtDecode(responded.data)
             if(responded.ok==1){
                 respuesta.value=responded
             }
@@ -188,7 +188,7 @@ export const useAplicacionMora = () => {
         try {
             let responded = await prestamoApi.put('api/aplicacion-moras/'+id+'/enable',null,configPost)
             errors.value =''
-            responded = { jwtDecode }(responded.data)
+            responded = jwtDecode(responded.data)
             if(responded.ok==1){
                 respuesta.value=responded
             }

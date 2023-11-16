@@ -178,6 +178,7 @@ const habilitar = (id) => {
                                     <th class="text-center">#</th>
                                     <th class="text-center">Nombre</th>
                                     <th class="text-center">Dias</th>
+                                    <th class="text-center">Valor Interes</th>
                                     <th class="text-center">Estado</th>
                                     <th class="text-center">Acciones</th>
                                 </tr>
@@ -192,6 +193,7 @@ const habilitar = (id) => {
                                     <td class="text-center" v-text="index+frecuenciaPagos.from"></td>
                                     <td v-text="tipo.nombre"></td>
                                     <td class="text-center" v-text="tipo.dias"></td>
+                                    <td class="text-center" v-text="tipo.valor_interes"></td>
                                     <td class="text-center">
                                         <span class="badge bg-success" v-if="tipo.es_activo==1">Activo</span>
                                         <span class="badge bg-dark" v-else-if="tipo.es_activo==0">Inactivo</span>

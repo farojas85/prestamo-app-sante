@@ -53,7 +53,7 @@ export const useMoneda = () => {
 
         if(respond.status == 200)
         {
-            monedas.value = { jwtDecode }(respond.data).monedas;
+            monedas.value = jwtDecode(respond.data).monedas;
         }
     }
 
@@ -106,7 +106,7 @@ export const useMoneda = () => {
         try {
             let respond = await prestamoApi.post('/api/monedas',data,configPost);
 
-            respond = { jwtDecode }(respond.data)
+            respond = jwtDecode(respond.data)
             console.log(respond)
             errors.value = []
             if(respond.ok==1)
@@ -132,7 +132,7 @@ export const useMoneda = () => {
 
         if(respond.status == 200)
         {
-            moneda.value = { jwtDecode }(respond.data).moneda
+            moneda.value = jwtDecode(respond.data).moneda
         }
     }
 
@@ -140,7 +140,7 @@ export const useMoneda = () => {
         errors.value = ''
         try {
             let responded = await prestamoApi.put('api/monedas/'+data.id,data,configPost)
-            responded = { jwtDecode }(responded.data)
+            responded = jwtDecode(responded.data)
             errors.value =''
             if(responded.ok==1){
                 respuesta.value=responded
@@ -176,7 +176,7 @@ export const useMoneda = () => {
         try {
             let responded = await prestamoApi.put('api/monedas/'+id+'/disable',null,configPost)
             errors.value =''
-            responded = { jwtDecode }(responded.data)
+            responded = jwtDecode(responded.data)
             if(responded.ok==1){
                 respuesta.value=responded
             }
@@ -194,7 +194,7 @@ export const useMoneda = () => {
         try {
             let responded = await prestamoApi.put('api/monedas/'+id+'/enable',null,configPost)
             errors.value =''
-            responded = { jwtDecode }(responded.data)
+            responded = jwtDecode(responded.data)
             if(responded.ok==1){
                 respuesta.value=responded
             }

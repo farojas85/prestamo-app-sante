@@ -3,13 +3,15 @@ import { ref, onMounted } from 'vue';
 import { useHelper } from '../../helpers';
 import { useEmpleado } from '../../composables/empleado/empleados';
 import EmpleadoForm from './Form.vue';
+import { prestamoApi } from '../../api';
 
 const { Toast, Swal } = useHelper();
 const {
     form, dato, empleados, errors, respuesta, empleado,
     distritos, provincias, departamentos,
     listar, buscar, isActived, pagesNumber, cambiarPaginacion, cambiarPagina,
-    limpiar, obtenerEmpleado, inhabilitarEmpleado, habilitarEmpleado, imprimirContratoEmpleado
+    limpiar, obtenerEmpleado, inhabilitarEmpleado, habilitarEmpleado, imprimirContratoEmpleado,
+    subirContratoEmpleado, verContratoEmpleado
 } = useEmpleado();
 
 
@@ -146,25 +148,48 @@ const imprimirContrato = async (id) => {
 }
 
 const SubirContrato = async (id) => {
+    await obtenerEmpleado(id);
+    let persona = empleado.value.persona;
+    let apellidos_nombres = (persona.apellido_paterno+' '+persona.apellido_materno+' '+persona.nombres) ?? "";
+
     const { value: file } = await Swal.fire({
+        text:"De: "+apellidos_nombres,
         title: "Subir Contrato",
         input: "file",
         inputAttributes: {
-            "accept": "pdf/*",
+            "accept": "application/pdf",
             "aria-label": "Subir contrato"
         }
     });
 
     if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            Swal.fire({
-            title: "Your uploaded picture",
-            imageUrl: e.target.result,
-            imageAlt: "The uploaded picture"
+        var formData = new FormData();
+        
+        var pdf = $('.swal2-file')[0].files[0];
+
+        formData.append("contrato",file);
+        formData.append('empleado_id',id);
+
+        await  subirContratoEmpleado(formData);
+
+        if(respuesta.value.ok==1)
+        {
+            Toast.fire({
+                icon: 'success',
+                title: respuesta.value.mensaje
             });
-        };
-        reader.readAsDataURL(file);
+            listar();
+        }
+        // const reader = new FileReader();
+        // reader.onload = (e) => {
+        //     Swal.fire({
+        //     title: "Your uploaded picture",
+        //     imageUrl: e.target.result,
+        //     imageAlt: "The uploaded picture"
+        //     });
+        // };
+        // reader.readAsDataURL(file);
+
     }
 }
 const enviarNotificacion = async(numero_documento) => {
@@ -256,16 +281,22 @@ const enviarNotificacion = async(numero_documento) => {
                                                 @click.prevent="mostrar(emple.id)">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <button class="btn bg-primary btn-sm mr-1"
-                                                title="Imprimir Contrato"
-                                                @click.prevent="imprimirContrato(emple.id)">
-                                                <i class="fas fa-print"></i>
+                                            <button type="button" class="btn btn-primary btn-sm dropdown-toggle mr-1" data-toggle="dropdown">
+                                                <i class="fas fa-folder-closed"></i>
                                             </button>
-                                            <button class="btn bg-orange btn-sm mr-1"
-                                                title="Subir Contrato"
-                                                @click.prevent="SubirContrato(emple.id)">
-                                                <i class="fas fa-upload"></i>
-                                            </button>
+                                            <div class="dropdown-menu table-warning">
+                                                <a class="dropdown-item" href="#" @click.prevent="imprimirContrato(emple.id)">
+                                                    <i class="fas fa-print fa-fw text-pruple"></i> Imprimir Contrato
+                                                </a>
+                                                <a class="dropdown-item" href="#" @click.prevent="SubirContrato(emple.id)">
+                                                    <i class="fas fa-upload fa-fw text-primary"></i> Subir Contrato
+                                                </a>
+
+                                                <a class="dropdown-item" href="#" v-if="emple.contrato_pdf"
+                                                    @click.prevent="verContratoEmpleado(emple.id)">
+                                                    <i class="fas fa-file-pdf fa-fw text-danger"></i> Ver Contrato
+                                                </a>
+                                            </div>
                                             <button class="btn btn-secondary btn-sm mr-1"
                                                 title="Inhabilitar Empleado"
                                                 @click.prevent="inhabilitar(emple.id)">

@@ -29,10 +29,10 @@ export const usePrestamo = () => {
         fecha_prestamo:'',
         user_id:'',
         role:'',
-        frecuencia_pago_id:1,
+        frecuencia_pago_id:'',
         capital_inicial:0,
         aplicacion_interes_id:2,
-        interes:10,
+        interes:0,
         numero_cuotas:1,
         interes_moratorio:2.5,
         dias_gracia:0,
@@ -68,47 +68,42 @@ export const usePrestamo = () => {
     }
 
     const obtenerPrestamosTodos = async() => {
-        let dataParam = getdataParamsPaginationByUser(dato.value);
-        let respond = await prestamoApi.get('/api/prestamos/all'+dataParam,config);
+        // let dataParam = getdataParamsPaginationByUser(dato.value);
+        // let respond = await prestamoApi.get('/api/prestamos/all'+dataParam,config);
 
-        if(respond.status == 404)
-        {
-            errors.value = respond.data.error
-        }
+        // if(respond.status == 404)
+        // {
+        //     errors.value = respond.data.error
+        // }
 
-        if(respond.status == 200)
-        {
-            prestamos.value = jwtDecode(respond.data).prestamos;
-        }
+        // if(respond.status == 200)
+        // {
+        //     prestamos.value = jwtDecode(respond.data).prestamos;
+        // }
     }
 
     const obtenerPrestamosEliminados = async() => {
-        let dataParam = getdataParamsPaginationByUser(dato.value);
-        let respond = await prestamoApi.get('/api/prestamos/deletes'+dataParam,config);
+        // let dataParam = getdataParamsPaginationByUser(dato.value);
+        // let respond = await prestamoApi.get('/api/prestamos/deletes'+dataParam,config);
 
-        if(respond.status == 404)
-        {
-            errors.value = respond.data.error
-        }
+        // if(respond.status == 404)
+        // {
+        //     errors.value = respond.data.error
+        // }
 
-        if(respond.status == 200)
-        {
-            prestamos.value = jwtDecode(respond.data).prestamos;
-        }
+        // if(respond.status == 200)
+        // {
+        //     prestamos.value = jwtDecode(respond.data).prestamos;
+        // }
     }
 
-    const listarPrestamos = {
-        'habilitados': obtenerPrestamos(),
-        'todos': obtenerPrestamosTodos(),
-        'eliminados': obtenerPrestamosEliminados()
-    }
 
 
     const listar = async(page=1) => {
 
         dato.value.page = page
 
-        await listarPrestamos[showPrestamo.value]();
+        await obtenerPrestamos();
     }
 
 
@@ -161,6 +156,10 @@ export const usePrestamo = () => {
         if(respond.status == 200)
         {
             frecuenciaPagos.value = jwtDecode(respond.data).frecuencia_pagos
+
+            let frecuencia = frecuenciaPagos.value[0];
+            form.value.frecuencia_pago_id = frecuencia.id;
+            form.value.interes = frecuencia.valor_interes;
         }
     }
 
@@ -187,42 +186,54 @@ export const usePrestamo = () => {
         }
         catch (error) {
             errors.value = [];
-            // if(error.response.status == 422) {
-            //     errors.value = error.response.data.errors
-            // }
-            // if(error.response.status == 404)
-            // {
-            //     errors.value = respond.data.error
-            // }
+            if(error.response.status == 422) {
+                errors.value = error.response.data.errors
+            }
+            if(error.response.status == 404)
+            {
+                errors.value = respond.data.error
+            }
         }
     }
 
     const agregrarPrestamo = async(data) => {
         errors.value = [];
         respuesta.value = []
-        try {
-            let respond = await prestamoApi.post('/api/prestamos',data,configPost);
+        
+        
+        let respond = await prestamoApi.post('/api/prestamos',data,configPost);
 
+        if(respond.status == 422)
+        {
+            errors.value = respond.data.errors
+        }
+        
+        if(respond.status = 200)
+        {
             respond = jwtDecode(respond.data)
-            errors.value = []
             if(respond.ok==1)
             {
                 respuesta.value = respond
-                persona.value = respond.data
-            }
 
-        } catch (error) {
-            errors.value = [];
-            if(error.response.status === 422) {
-                errors.value = error.response.data.errors
+                console.log(respuesta.value)
             }
+        }
+
+    }
+
+    const obtenerValorInteres = () => {
+        if(form.value.frecuencia_pago_id)
+        {
+            let frecuencia = frecuenciaPagos.value.find(f => f.id === form.value.frecuencia_pago_id)
+            form.value.interes = frecuencia.valor_interes;
+
         }
     }
     
     return {
         errors, respuesta, prestamos, dato, form, frecuenciaPagos, aplicacionIntereses, persona,
         listar, buscar, isActived, pagesNumber,
-        cambiarPagina, cambiarPaginacion, limpiar,
+        cambiarPagina, cambiarPaginacion, limpiar,obtenerValorInteres,
         obtenerListaFrecuenciaPagos, obtenerListaAplicacionInrtereses, buscarClienteExiste,
         agregrarPrestamo
     }

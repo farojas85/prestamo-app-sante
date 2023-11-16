@@ -83,9 +83,19 @@ const guardar = () => {
                         <div class="col-md-2 mb-1">
                             <input type="number" class="form-control form-control-sm" name="dias" min="1"
                                 v-model="form.dias"
-                                :class="{ 'is-invalid' : form.errors.dias}" placeholder="Ruta de Acceso"
+                                :class="{ 'is-invalid' : form.errors.dias}" placeholder="Ingrese días"
                                 >
                             <small class="text-danger" v-for="error in form.errors.dias" :key="error">{{error }}</small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="valor_interes" class="col-form-label col-form-label-sm col-md-3 mb-1"> Valor Interés:</label>
+                        <div class="col-md-2 mb-1">
+                            <input type="number" class="form-control form-control-sm" name="valor_interes" step="0.1"
+                                v-model="form.valor_interes"
+                                :class="{ 'is-invalid' : form.errors.valor_interes}" placeholder="Ingrese valor Interés"
+                                >
+                            <small class="text-danger" v-for="error in form.errors.valor_interes" :key="error">{{error }}</small>
                         </div>
                     </div>
                     <div class="form-group row" v-if="form.estado_crud!='nuevo'">

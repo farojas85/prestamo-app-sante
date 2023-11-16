@@ -21,6 +21,7 @@ export const useFrecuenciaPago = () => {
         id:null,
         nombre:'',
         dias:'',
+        valor_interes:'',
         es_activo:1,
         estado_crud:'',
         errors:[]
@@ -30,6 +31,7 @@ export const useFrecuenciaPago = () => {
         form.value.id = null;
         form.value.nombre = "";
         form.value.dias = 1;
+        form.value.valor_interes = "";
         form.value.es_activo=1;
         form.value.estado_crud ="";
         form.value.errors = [];
@@ -103,7 +105,6 @@ export const useFrecuenciaPago = () => {
             let respond = await prestamoApi.post('/api/frecuencia-pagos',data,configPost);
 
             respond = jwtDecode(respond.data)
-            console.log(respond)
             errors.value = []
             if(respond.ok==1)
             {

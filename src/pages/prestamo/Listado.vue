@@ -1,5 +1,5 @@
 <script setup>
-import { ref, toRefs } from 'vue';
+import { ref, toRefs, onMounted } from 'vue';
 import PrestamoFrom from './forms/PrestamoForm.vue';
 import { usePrestamo } from '../../composables/prestamo/prestamos';
 import { useDatosSession } from '../../composables/session';
@@ -8,11 +8,14 @@ const { usuario, roles} = useDatosSession();
 const cardTitle = ref('Nuevo Préstamo');
 
 const { 
-    prestamos, errors, form, dato, respuesta,
+    prestamos, errors, form, dato, respuesta, 
     listar, buscar, isActived, pagesNumber, cambiarPagina, cambiarPaginacion,
     limpiar
 } = usePrestamo();
 
+onMounted(() => {
+    listar();
+})
 
 const cambiarCrud = (crud) => {
     if(crud == 'nuevo') {
@@ -87,10 +90,10 @@ const nuevo = (crud) => {
                                         <tr>
                                             
                                             <th class="text-center">#</th>
-                                            <th>Fecha</th>
+                                            <th>Fecha/Hora</th>
                                             <th>Cliente</th>
                                             <!-- <th v-if="$auth.hasRole('administrador') || $auth.hasRole('super-usuario')">Cobrador</th> -->
-                                            <th>Monto</th>
+                                            <th>Capital Inicial</th>
                                             <th>Interes</th>
                                             <th>Monto Final</th>
                                             <th>Estado</th>
@@ -104,6 +107,19 @@ const nuevo = (crud) => {
                                         </tr>
                                         <tr v-else v-for="(presta, indice) in prestamos.data">
                                             <td v-text="indice+prestamos.from"></td>
+                                            <td v-text="presta.fecha_prestamo"></td>
+                                            <td v-text="presta.cliente"></td>
+                                            <td v-text="presta.capital_inicial"></td>
+                                            <td v-text="presta.interes"></td>
+                                            <td v-text="presta.total"></td>
+                                            <td class="text-center">
+                                                <span class="badge badge-info" v-if="presta.estado==1">Generado</span>
+                                                <span class="badge badge-warning" v-else-if="presta.estado==2">Generado</span>
+                                                <span class="badge badge-success" v-if="presta.estado==3">Pagado</span>
+                                                <span class="badge badge-secondary" v-if="presta.estado==4">Anulado</span>
+                                                <span class="badge badge-danger" v-if="presta.estado==5">Eliminado</span>
+
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -116,7 +132,7 @@ const nuevo = (crud) => {
     </div>
     <div class="row" v-if="form.estado_crud=='nuevo'">
         <div class="col-md-12">
-            <PrestamoFrom :form="form" :cardTitle="cardTitle"></PrestamoFrom>
+            <PrestamoFrom :form="form" :cardTitle="cardTitle" @onListar="listar"></PrestamoFrom>
         </div>
     </div>
 </template>
