@@ -11,6 +11,7 @@ import Configuracion from '../pages/configuracion/Inicio.vue';
 import Empleado from '../pages/empleado/Inicio.vue';
 import Prestamo from '../pages/prestamo/Inicio.vue';
 import Configuraciones from '../pages/iniciales/Configuraciones.vue';
+import RegistroPago from '../pages/registro-pago/Inicio.vue';
 
 const routes = [
     {
@@ -40,6 +41,10 @@ const routes = [
     {
         path: '/configuraciones', name:'Configuraciones', component: Configuraciones ,
         meta:{layout: DefaultLayout, icono: 'fas fa-gear fa-fw'}
+    },
+    {
+        path: '/registro-pago', name:'Registro Pagos', component: RegistroPago ,
+        meta:{layout: DefaultLayout, icono: 'fas fa-money-check-dollar fa-fw'}
     },
     // {
     //     path: '/almacen', name:'Almacén', component: Almacen ,
