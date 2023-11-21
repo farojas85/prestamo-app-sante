@@ -17,7 +17,7 @@ const {
     prestamos, errors, form, dato, respuesta, prestamo,
     listar, buscar, isActived, pagesNumber, cambiarPagina, cambiarPaginacion,
     modificarEstadoPrestamo, eliminarPermanentePrestamo, obtenerPrestamo,
-    imprimirContratoPrestamo
+    imprimirContratoPrestamo, subirContratoPrestamo, verContratoPrestamo
 } = usePrestamo();
 
 onMounted(() => {
@@ -364,6 +364,52 @@ const verCuotas = async(id) => {
     }
 }
 
+const SubirContrato = async(id) => {
+    limpiar();
+    await obtenerPrestamo(id);
+    let apellidos_nombres = (prestamo.value.apellido_paterno+' '+prestamo.value.apellido_materno+' '+prestamo.value.nombres) ?? "";
+
+    const { value: file } = await Swal.fire({
+        text:"De: "+apellidos_nombres,
+        title: "Subir Contrato Préstamo",
+        input: "file",
+        inputAttributes: {
+            "accept": "application/pdf",
+            "aria-label": "Subir contrato"
+        }
+    });
+
+    if (file) {
+        var formData = new FormData();
+        
+        var pdf = $('.swal2-file')[0].files[0];
+
+        formData.append("contrato",file);
+        formData.append('id',id);
+
+        await subirContratoPrestamo(formData);
+
+        if(respuesta.value.ok==1)
+        {
+            Toast.fire({
+                icon: 'success',
+                title: respuesta.value.mensaje
+            });
+            listar();
+        }
+
+    }
+}
+
+const verContrato =async(id) => {
+    limpiar();
+    
+    await obtenerPrestamo(id);
+
+    await verContratoPrestamo(prestamo.value);
+
+}
+
 
 </script>
 <template>
@@ -485,14 +531,31 @@ const verCuotas = async(id) => {
                                                     v-if="['Observado','Rechazado'].includes(presta.nombre_operacion) && puede('prestamos.observaciones')">
                                                     <i class="fas fa-arrows-to-eye"></i>
                                                 </button>
-                                                <button class="btn btn-primary btn-sm mr-1"
-                                                    title="Imprimir Contrado"
-                                                    v-if="!['Generado','Observado','Rechazado'].includes(presta.nombre_operacion) && puede('prestamos.imprimir-contrato')"
-                                                    @click.prevent="imprimirContrato(presta.id)"
+                                                <button type="button" class="btn btn-primary btn-sm dropdown-toggle mr-1" data-toggle="dropdown"
+                                                    v-if="!['Generado','Observado','Rechazado'].includes(presta.nombre_operacion) 
+                                                            && (puede('prestamos.imprimir-contrato') || puede('prestamos.subir-contrato') || puede('prestamos.ver-contrato'))"
                                                     >
-                                                    <i class="fas fa-file-lines"></i>
+                                                    <i class="fas fa-folder-closed"></i>
                                                 </button>
-                                                
+                                                <div class="dropdown-menu table-warning">
+                                                    <a class="dropdown-item" href="#" @click.prevent="imprimirContrato(presta.id)"
+                                                        v-if="!['Generado','Observado','Rechazado'].includes(presta.nombre_operacion) && puede('prestamos.imprimir-contrato')"
+                                                    >
+                                                        <i class="fas fa-print fa-fw text-pruple"></i> Imprimir Contrato
+                                                    </a>
+                                                    <a class="dropdown-item" href="#" @click.prevent="SubirContrato(presta.id)"
+                                                        v-if="!['Generado','Observado','Rechazado'].includes(presta.nombre_operacion) && puede('prestamos.subir-contrato')"
+                                                    >
+                                                        <i class="fas fa-upload fa-fw text-primary"></i> Subir Contrato
+                                                    </a>
+
+                                                    <a class="dropdown-item" href="#" 
+                                                        v-if="presta.contrato_pdf && puede('prestamos.subir-contrato')"
+                                                        @click.prevent="verContrato(presta.id)"
+                                                    >
+                                                        <i class="fas fa-file-pdf fa-fw text-danger"></i> Ver Contrato
+                                                    </a>
+                                                </div>                                                
                                                 <button class="btn btn-success btn-sm mr-1"
                                                     title="Enviar Notificaciones Préstamo"
                                                     @click.prevent=""
