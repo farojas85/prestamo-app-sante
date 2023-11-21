@@ -32,7 +32,9 @@ const descargar = () => {
                 <div class="modal-body" id="datos-descargar">
                     <div class="form-group row">
                         <div class="col-md-12 text-center">
-                            <h4>{{ form.nombres+' 'form.apellido_paterno+' '+form.apellido_materno }}</h4>
+                            <template v-if="form.nombres">
+                                <h4>{{form.nombres+' 'form.apellido_paterno+' '+form.apellido_materno }}</h4>
+                            </template>
 
                         </div>
                     </div>
