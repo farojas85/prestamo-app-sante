@@ -34,6 +34,7 @@ const obtenerDatos = async(id) => {
     form.value.id = frecuenciaPago.value.id;
     form.value.nombre = frecuenciaPago.value.nombre;
     form.value.dias = frecuenciaPago.value.dias
+    form.value.valor_interes = frecuenciaPago.value.valor_interes
     form.value.es_activo = frecuenciaPago.value.es_activo == 1 ? true : false
 }
 
@@ -60,7 +61,7 @@ const elimina = async (id) => {
 }
 
 const eliminar = (id) => {
-        Swal.fire({
+    Swal.fire({
         //title: 'Grados Ministeriales',
         title:'¿Está seguro de eliminar el Frecuencia de Pago?',
         icon:'question',

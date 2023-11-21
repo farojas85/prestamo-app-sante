@@ -3,14 +3,20 @@ import { ref, toRefs, onMounted } from 'vue';
 import PrestamoFrom from './forms/PrestamoForm.vue';
 import { usePrestamo } from '../../composables/prestamo/prestamos';
 import { useDatosSession } from '../../composables/session';
+import { useHelper } from '../../helpers';
 
-const { usuario, roles} = useDatosSession();
+const { usuario, roles, puede} = useDatosSession();
+
+const {Swal, Toast} = useHelper();
+
+
 const cardTitle = ref('Nuevo Préstamo');
 
 const { 
-    prestamos, errors, form, dato, respuesta, 
+    prestamos, errors, form, dato, respuesta, prestamo,
     listar, buscar, isActived, pagesNumber, cambiarPagina, cambiarPaginacion,
-    limpiar
+    modificarEstadoPrestamo, eliminarPermanentePrestamo, obtenerPrestamo,
+    imprimirContratoPrestamo
 } = usePrestamo();
 
 onMounted(() => {
@@ -23,6 +29,33 @@ const cambiarCrud = (crud) => {
     }
 }
 
+const limpiar = () => {
+    form.value.id = null;
+    form.value.cliente_id='';
+    form.value.numero_documento="";
+    form.value.nombres='';
+    form.value.apellido_paterno='';
+    form.value.apellido_materno='';
+    form.value.telefono='';
+    form.value.direccion='';
+    form.value.fecha_prestamo='';
+    form.value.user_id='';
+    form.value.role='';
+    form.value.frecuencia_pago_id='';
+    form.value.capital_inicial=0;
+    form.value.aplicacion_interes_id='';
+    form.value.interes=0;
+    form.value.numero_cuotas=1;
+    form.value.aplicacion_mora_id='';
+    form.value.interes_moratorio=2.5;
+    form.value.dias_gracia=0;
+    // form.value.total=0;
+    // form.value.valor_cuota=0;
+    form.value.estado_crud='';
+    form.value.errors = [];
+    errors.value = [];
+}
+
 
 const nuevo = (crud) => {
     limpiar();
@@ -30,6 +63,273 @@ const nuevo = (crud) => {
     form.value.user_id = usuario.value.id
     form.value.role = roles.value.slug
     cardTitle.value = 'Nuevo Préstamo'
+}
+
+const observarPrestamo = async(id) => {
+    const { value: text } = await Swal.fire({
+        input: "textarea",
+        inputLabel: "OBSERVACIONES",
+        inputPlaceholder: "Ingrese sus observaciones...",
+        inputAttributes: {
+            "aria-label": "Type your message here"
+        },
+        showCancelButton: true,
+        confirmButtonColor: "#28a745",
+        confirmButtonText: "Guardar",
+        cancelButtonText: "Cerrar"
+    });
+    if (text) {     
+        let data = new FormData();
+        let presta = prestamos.value.data.find(p => p.id === id);
+        data.append('id',id);
+        data.append('estado','Observado');
+        data.append('observaciones',text);
+        
+        await modificarEstadoPrestamo(data)
+
+        if(respuesta.value.ok==1)
+        {
+            Toast.fire({
+                icon: 'success',
+                title: respuesta.value.mensaje
+            });
+            listar();
+        }
+    }
+}
+
+const acepta = async (id) => {
+    let data = new FormData();
+    let presta = prestamos.value.data.find(p => p.id === id);
+    data.append('id',id);
+    data.append('estado','Pendiente');
+
+    await modificarEstadoPrestamo(data);
+
+    if(respuesta.value.ok==1)
+    {
+        Toast.fire({
+            icon: 'success',
+            title: respuesta.value.mensaje
+        });
+        listar();
+    }
+}
+
+const rechaza = async(id) => {
+    const { value: text } = await Swal.fire({
+        input: "textarea",
+        inputLabel: "DESCRIPCIÓN DE RECHAZO",
+        inputPlaceholder: "Ingrese los motivos del rechazado de préstamo...",
+        inputAttributes: {
+            "aria-label": "Type your message here"
+        },
+        showCancelButton: true,
+        confirmButtonColor: "#28a745",
+        confirmButtonText: "Guardar",
+        cancelButtonText: "Cerrar"
+    });
+    if (text) {     
+        let data = new FormData();
+        let presta = prestamos.value.data.find(p => p.id === id);
+        data.append('id',id);
+        data.append('estado','Rechazado');
+        data.append('observaciones',text);
+        
+        await modificarEstadoPrestamo(data)
+
+        if(respuesta.value.ok==1)
+        {
+            Toast.fire({
+                icon: 'success',
+                title: respuesta.value.mensaje
+            });
+            listar();
+        }
+    }
+}
+
+const aceptarPrestamo = (id) => {
+    let presta = prestamos.value.data.find(p => p.id === id)
+
+    Swal.fire({
+        text:'De: '+presta.cliente,
+        title:'¿Está seguro de aceptar el Préstamo?',
+        icon:'question',
+        confirmButtonColor: "#28a745",
+        confirmButtonText: "Aceptar",
+        denyButtonText:'Observar',
+        denyButtonColor:'#6610f2',
+        showDenyButton: true,
+        showCancelButton: true,
+        cancelButtonText: "Cerrar",
+        cancelButtonColor:'#6e7881'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            acepta(id)
+        }   
+        else if(result.isDenied) {
+           observarPrestamo(id)
+        }
+    })
+}
+
+const rechazarPrestamo = (id) => {
+    let presta = prestamos.value.data.find(p => p.id === id);
+    Swal.fire({
+        text:'De: '+presta.cliente,
+        title:'¿Está seguro de rechazar el Préstamo?',
+        icon:'question',
+        confirmButtonColor: "#28a745",
+        confirmButtonText: "Rechazar",
+        cancelButtonText: "Cerrar",
+        cancelButtonColor:'#6e7881',
+        showCancelButton: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            rechaza(id)
+        }
+    })
+}
+
+const anula = async(id) => {
+
+    let data = new FormData();
+    let presta = prestamos.value.data.find(p => p.id === id);
+    data.append('id',id);
+    data.append('estado','Anulado');
+    
+    await modificarEstadoPrestamo(data)
+
+    if(respuesta.value.ok==1)
+    {
+        Toast.fire({
+            icon: 'success',
+            title: respuesta.value.mensaje
+        });
+        listar();
+    }
+}
+
+const anularPrestamo = (id) => {
+    let presta = prestamos.value.data.find(p => p.id === id);
+    Swal.fire({
+        text:'De: '+presta.cliente,
+        title:'¿Está seguro de anular el Préstamo?',
+        icon:'question',
+        confirmButtonColor: "#28a745",
+        confirmButtonText: "Aceptar",
+        cancelButtonText: "Cerrar",
+        cancelButtonColor:'#6e7881',
+        showCancelButton: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            anula(id)
+        }
+    })
+}
+
+const elimina = async(id) => {
+    await eliminarPermanentePrestamo({id:id})
+
+    if(respuesta.value.ok==1)
+    {
+        Toast.fire({
+            icon: 'success',
+            title: respuesta.value.mensaje
+        });
+        listar();
+    }
+}
+
+const eliminarPrestamo = (id) => {
+    let presta = prestamos.value.data.find(p => p.id === id);
+    Swal.fire({
+        text:'De: '+presta.cliente,
+        title:'¿Está seguro de eliminar el Préstamo?',
+        icon:'question',
+        confirmButtonColor: "#28a745",
+        confirmButtonText: "Aceptar",
+        cancelButtonText: "Cerrar",
+        cancelButtonColor:'#6e7881',
+        showCancelButton: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            elimina(id)
+        }
+    })
+}
+
+const editar = async (id) => {
+    limpiar();
+    await obtenerPrestamo(id);
+    form.value.estado_crud = 'editar'
+    cardTitle.value = 'Editar Préstamo';
+    console.log(respuesta.value)
+    if(respuesta.value.ok==1)
+    {
+        form.value.id = prestamo.value.id;
+        form.value.cliente_id= prestamo.value.cliente_id;
+        form.value.nombres = prestamo.value.nombres;
+        form.value.apellido_paterno = prestamo.value.apellido_paterno;
+        form.value.apellido_materno = prestamo.value.apellido_materno;
+        form.value.numero_documento = prestamo.value.numero_documento;
+        form.value.telefono = prestamo.value.telefono;
+        form.value.direccion = prestamo.value.direccion;
+        form.value.fecha_prestamo= prestamo.value.fecha_prestamo;
+        form.value.user_id= prestamo.value.user_id;
+        // form.value.role= "";
+        form.value.frecuencia_pago_id= prestamo.value.frecuencia_pago_id;
+        form.value.capital_inicial= prestamo.value.capital_inicial;
+        form.value.aplicacion_interes_id= prestamo.value.aplicacion_interes_id;
+        form.value.interes= prestamo.value.interes;
+        form.value.numero_cuotas= prestamo.value.numero_cuotas   ;
+        form.value.aplicacion_mora_id= prestamo.value.aplicacion_mora_id;
+        form.value.interes_moratorio= prestamo.value.interes_moratorio ;
+        form.value.dias_gracia= prestamo.value.dias_gracia;
+        form.value.total= prestamo.value.total;
+        // form.value.valor_cuota= "";
+        form.value.es_activo= (prestamo.value.es_activo== 1) ? true : false ;
+        
+    }
+}
+
+const mostrar = async (id) => {
+    limpiar();
+    await obtenerPrestamo(id);
+    form.value.estado_crud = 'mostrar'
+    cardTitle.value = 'Mostrar Préstamo';
+    console.log(respuesta.value)
+    if(respuesta.value.ok==1)
+    {
+        form.value.id = prestamo.value.id;
+        form.value.cliente_id= prestamo.value.cliente_id;
+        form.value.nombres = prestamo.value.nombres;
+        form.value.apellido_paterno = prestamo.value.apellido_paterno;
+        form.value.apellido_materno = prestamo.value.apellido_materno;
+        form.value.numero_documento = prestamo.value.numero_documento;
+        form.value.telefono = prestamo.value.telefono;
+        form.value.direccion = prestamo.value.direccion;
+        form.value.fecha_prestamo= prestamo.value.fecha_prestamo;
+        form.value.user_id= prestamo.value.user_id;
+        // form.value.role= "";
+        form.value.frecuencia_pago_id= prestamo.value.frecuencia_pago_id;
+        form.value.capital_inicial= prestamo.value.capital_inicial;
+        form.value.aplicacion_interes_id= prestamo.value.aplicacion_interes_id;
+        form.value.interes= prestamo.value.interes;
+        form.value.numero_cuotas= prestamo.value.numero_cuotas   ;
+        form.value.aplicacion_mora_id= prestamo.value.aplicacion_mora_id;
+        form.value.interes_moratorio= prestamo.value.interes_moratorio ;
+        form.value.dias_gracia= prestamo.value.dias_gracia;
+        form.value.total= prestamo.value.total;
+        // form.value.valor_cuota= "";
+        form.value.es_activo= (prestamo.value.es_activo== 1) ? true : false ;
+        
+    }
+}
+
+const imprimirContrato = (id) => {
+    imprimirContratoPrestamo(id);
 }
 
 
@@ -94,7 +394,7 @@ const nuevo = (crud) => {
                                             <th>Cliente</th>
                                             <!-- <th v-if="$auth.hasRole('administrador') || $auth.hasRole('super-usuario')">Cobrador</th> -->
                                             <th>Capital Inicial</th>
-                                            <th>Interes</th>
+                                            <th>Interes (%)</th>
                                             <th>Monto Final</th>
                                             <th>Estado</th>
                                             <th></th>
@@ -113,12 +413,78 @@ const nuevo = (crud) => {
                                             <td v-text="presta.interes"></td>
                                             <td v-text="presta.total"></td>
                                             <td class="text-center">
-                                                <span class="badge badge-info" v-if="presta.estado==1">Generado</span>
-                                                <span class="badge badge-warning" v-else-if="presta.estado==2">Generado</span>
-                                                <span class="badge badge-success" v-if="presta.estado==3">Pagado</span>
-                                                <span class="badge badge-secondary" v-if="presta.estado==4">Anulado</span>
-                                                <span class="badge badge-danger" v-if="presta.estado==5">Eliminado</span>
+                                                <span class="badge badge-info" v-if="presta.nombre_operacion=='Generado'">Generado</span>
+                                                <span class="badge badge-warning" v-else-if="presta.nombre_operacion=='Pendiente'">Pendiente</span>
+                                                <span class="badge badge-success" v-else-if="presta.nombre_operacion=='Pagado'">Pagado</span>
+                                                <span class="badge badge-secondary" v-else-if="presta.nombre_operacion=='Anulado'">Anulado</span>
+                                                <span class="badge badge-danger" v-else-if="presta.nombre_operacion=='Eliminado'">Eliminado</span>
+                                                <span class="badge bg-indigo" v-else-if="presta.nombre_operacion=='Observado'">Observado</span>
+                                                <span class="badge bg-maroon" v-else-if="presta.nombre_operacion=='Rechazado'">Rechazado</span>
 
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-success btn-sm mr-1"
+                                                    title="Aceptar Pŕestamo"
+                                                    @click.prevent="aceptarPrestamo(presta.id)"
+                                                    v-if="presta.nombre_operacion=='Generado' && puede('prestamos.aceptar')">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <button class="btn btn-warning btn-sm mr-1"
+                                                    title="Editar Préstamo"
+                                                    @click.prevent="editar(presta.id)"
+                                                    v-if="puede('prestamos.editar')">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-info btn-sm mr-1"
+                                                    title="Mostrar Préstamo"
+                                                    @click.prevent="mostrar(presta.id)"
+                                                    v-if="puede('prestamos.mostrar')">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn bg-orange btn-sm mr-1"
+                                                    title="Mostrar Observaciones Préstamo"
+                                                    @click.prevent=""
+                                                    v-if="['Observado','Rechazado'].includes(presta.nombre_operacion) && puede('prestamos.observaciones')">
+                                                    <i class="fas fa-arrows-to-eye"></i>
+                                                </button>
+                                                <button class="btn btn-primary btn-sm mr-1"
+                                                    title="Imprimir Contrado"
+                                                    v-if="!['Generado','Observado','Rechazado'].includes(presta.nombre_operacion) && puede('prestamos.imprimir-contrato')"
+                                                    @click.prevent="imprimirContrato(presta.id)"
+                                                    >
+                                                    <i class="fas fa-file-lines"></i>
+                                                </button>
+                                                <button class="btn bg-purple btn-sm mr-1"
+                                                    title="Ver Cuotas"
+                                                    @click.prevent=""
+                                                    v-if="!['Generado','Observado','Rechazado'].includes(presta.nombre_operacion) && puede('prestamos.ver-cuotas')">
+                                                    <i class="fas fa-check-to-slot"></i>
+                                                </button>
+                                                <button class="btn btn-success btn-sm mr-1"
+                                                    title="Enviar Notificaciones Préstamo"
+                                                    @click.prevent=""
+                                                    v-if="!['Generado','Observado','Rechazado'].includes(presta.nombre_operacion) && puede('prestamos.enviar-notificaciones')">
+                                                    <i class="fab fa-whatsapp"></i>
+                                                </button>
+                                                <button class="btn bg-indigo btn-sm mr-1"
+                                                    title="Rechazar Préstamo"
+                                                    v-if="presta.nombre_operacion=='Generado'  && puede('prestamos.rechazar')"
+                                                    @click.prevent="rechazarPrestamo(presta.id)"
+                                                    >
+                                                    <i class="fas fa-ban"></i>
+                                                </button>
+                                                <button class="btn bg-pink btn-sm mr-1"
+                                                    title="Anular Pŕestamo"
+                                                    @click.prevent="anularPrestamo(presta.id)"
+                                                    v-if="['Generado','Observado','Rechazado'].includes(presta.nombre_operacion) && puede('prestamos.anular')">
+                                                    <i class="fas fa-delete-left"></i>
+                                                </button>
+                                                <button class="btn btn-danger btn-sm mr-1"
+                                                    title="Eliminar Pŕestamo"
+                                                    @click.prevent="eliminarPrestamo(presta.id)"
+                                                    v-if="puede('prestamos.eliminar')">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -130,7 +496,7 @@ const nuevo = (crud) => {
             </div>
         </div>
     </div>
-    <div class="row" v-if="form.estado_crud=='nuevo'">
+    <div class="row" v-if="['nuevo','editar','mostrar'].includes(form.estado_crud)">
         <div class="col-md-12">
             <PrestamoFrom :form="form" :cardTitle="cardTitle" @onListar="listar"></PrestamoFrom>
         </div>

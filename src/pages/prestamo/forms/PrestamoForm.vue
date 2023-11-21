@@ -6,14 +6,14 @@ import {usePrestamo } from '../../../composables/prestamo/prestamos';
 import { useDatosSession } from '../../../composables/session';
 
 
-
-
 const { soloNumeros, Toast } = useHelper();
 
 const props = defineProps({
     form: Object,
     cardTitle: String
 });
+
+const emit = defineEmits(['onListar']);
 
 const { form, cardTitle } = toRefs(props);
 
@@ -48,7 +48,7 @@ const clienteFrm = ref({
 const {
     frecuenciaPagos,aplicacionIntereses, persona, errors, respuesta,
     obtenerListaFrecuenciaPagos, obtenerListaAplicacionInrtereses, buscarClienteExiste,
-    obtenerValorInteres,agregrarPrestamo
+    obtenerValorInteres,agregrarPrestamo,actualizarPrestamo
 } = usePrestamo();
 
 
@@ -60,16 +60,50 @@ onMounted(() => {
 
 
 form.value.total = computed(() => {
+    if(form.value.capital_inicial == 0)
+    {
+        return 0;
+    }
     return (Math.round( (parseFloat(form.value.capital_inicial)*( 1 + (parseFloat(form.value.interes)/100)))*100 )/100).toFixed(2) ;
 });
 
 form.value.valor_cuota = computed(() => {
+    if(form.value.capital_inicial == 0)
+    {
+        return 0;
+    }
     if(form.value.numero_cuotas <= 0 )  {
         return Math.round(parseFloat(form.value.total)).toFixed(2);
     }
     return (Math.round((parseFloat(form.value.total) / parseFloat(form.value.numero_cuotas))*100)/100).toFixed(2);
 })
 
+const limpiar = () => {
+    form.value.id = null;
+    form.value.cliente_id='';
+    form.value.numero_documento="";
+    form.value.nombres='';
+    form.value.apellido_paterno='';
+    form.value.apellido_materno='';
+    form.value.telefono='';
+    form.value.direccion='';
+    form.value.fecha_prestamo='';
+    form.value.user_id='';
+    form.value.role='';
+    form.value.frecuencia_pago_id='';
+    form.value.capital_inicial=0;
+    form.value.aplicacion_interes_id='';
+    form.value.interes=0;
+    form.value.numero_cuotas=1;
+    form.value.aplicacion_mora_id='';
+    form.value.interes_moratorio=2.5;
+    form.value.dias_gracia=0;
+    //form.value.total=0;
+    //form.value.valor_cuota=0;
+    form.value.estado_crud='';
+    form.value.errors = [];
+    errors.value = [];
+}
 
 const limpiarCliente = () => {
     clienteFrm.value.id='';
@@ -95,11 +129,18 @@ const nuevoCliente = () => {
     $("#modal-cliente-form").modal('show')
 }
 
+const editarCliente = () => {
+    clienteFrm.value.estado_crud = 'editar'
+    errorBusqueda.value = ''
+    $('#modal-cliente-form-title').html('Editar Cliente')
+    $("#modal-cliente-form").modal('show')
+}
+
 const buscaExisteCliente = async() => {
     errorBusqueda.value="";
     limpiarCliente();
 
-    await buscarClienteExiste(buscarDni.value)
+    await buscarClienteExiste(form.value.numero_documento)
 
     if(persona.value)
     {
@@ -110,7 +151,14 @@ const buscaExisteCliente = async() => {
         clienteFrm.value.apellido_paterno = persona.value.apellido_paterno;
         clienteFrm.value.apellido_materno = persona.value.apellido_materno;
         clienteFrm.value.direccion = persona.value.direccion;
-        form.value.cliente_id = persona.value.id
+        clienteFrm.value.telefono = persona.value.telefono;
+
+        form.value.cliente_id = clienteFrm.value.id
+        form.value.nombres = clienteFrm.value.nombres;
+        form.value.apellido_paterno = clienteFrm.value.apellido_paterno;
+        form.value.apellido_materno = clienteFrm.value.apellido_materno;
+        form.value.direccion = clienteFrm.value.direccion;
+        form.value.telefono = persona.value.telefono;
     }
 
     if(!persona.value)
@@ -120,14 +168,14 @@ const buscaExisteCliente = async() => {
 }
 
 const valorInteres = () => {
-    if(form.value.frecuencia_pago_id!= "")
-    {
-        let frecuencia = frecuenciaPagos.value.find(f => f.id === form.value.frecuencia_pago_id)
-        console.log(frecuencia)
-        form.value.interes = parseFloat(frecuencia.valor_interes).toFixed(2)
-        //form.value.interes = (frecuenciaPagos.value.find(f => f.id === form.value.frecuencia_pago_id)).valor_interess
-    }
+    // if(form.value.frecuencia_pago_id!= "")
+    // {
+    //     let frecuencia = frecuenciaPagos.value.find(f => f.id === form.value.frecuencia_pago_id)
+    //     console.log(frecuencia)
+    //     form.value.interes = parseFloat(frecuencia.valor_interes).toFixed(2)
+    // }
 }
+
 const crud = {
     'nuevo': async() => {
 
@@ -146,7 +194,7 @@ const crud = {
     },
     'editar': async() => {
         form.value.errors = [];
-        await actualizarFrecuenciaPago(form.value);
+        await actualizarPrestamo(form.value);
 
         if(errors.value) form.value.errors = errors.value;
 
@@ -154,7 +202,7 @@ const crud = {
         {
             form.value.errors = [];
             Toast.fire({icon:'success', title:respuesta.value.mensaje})
-            $('#modal-frecuencia-pago').modal('hide')
+            form.value.estado_crud =''
             emit('onListar')
         }
     },
@@ -162,6 +210,11 @@ const crud = {
 
 const guardar = async() => {
     crud[form.value.estado_crud]()
+}
+
+const cancelar = () => {
+   limpiar()
+   form.value.estado_crud = ""
 }
 
 </script>
@@ -190,19 +243,25 @@ const guardar = async() => {
                                                     <span class="input-group-text" id="basic-addon1">N&uacute;mero documento</span>
                                                 </div>
                                                 <input type="text" class="form-control" placeholder="Ingrese número de documento"
-                                                    v-model="buscarDni"
+                                                    v-model="form.numero_documento"
                                                     maxlength="15" @keypress="soloNumeros" 
-                                                    @change="buscaExisteCliente"/>
-                                                <div class="input-group-prepend input-group-append-sm">
-                                                    <button class="btn btn-info" @click="nuevoCliente">
+                                                    @change="buscaExisteCliente" :readonly="form.estado_crud=='mostrar'"/>
+                                                <div class="input-group-append">
+                                                    <button type="button" class="btn btn-danger" @click="nuevoCliente"
+                                                        v-if="form.estado_crud=='nuevo'">
                                                         <i class="fas fa-plus"></i>
                                                     </button>
+                                                    <button type="button" class="btn btn-warning" @click="editarCliente"
+                                                        v-if="form.estado_crud=='editar'">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <!-- <span class="input-group-text" id="basic-addon1">N&uacute;mero documento</span> -->
                                                 </div>
                                             </div>
                                             <small class="text-danger" v-if="errorBusqueda">{{ errorBusqueda }}</small>
                                         </div>
                                     </div>
-                                    <div class="row" v-if="clienteFrm.nombres">
+                                    <!-- <div class="row" v-if="clienteFrm.nombres">
                                         <div class="col-md-12">
                                             <div class="input-group mb-3">
                                                 <div class="input-group-prepend">
@@ -225,6 +284,31 @@ const guardar = async() => {
                                                     />
                                             </div>
                                         </div>
+                                    </div> -->
+
+                                    <div class="row" v-if="form.nombres">
+                                        <div class="col-md-12">
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="basic-addon1">Nombres y Apellidos</span>
+                                                </div>
+                                                <input type="text" class="form-control" placeholder="Ingrese número de documento"
+                                                    readonly
+                                                    :value="form.nombres+' '+form.apellido_paterno+' '+form.apellido_materno"
+                                                    />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="basic-addon1">Dirección</span>
+                                                </div>
+                                                <input type="text" class="form-control" placeholder="Ingrese dirección"
+                                                    readonly
+                                                    :value="form.direccion"
+                                                    />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -243,40 +327,18 @@ const guardar = async() => {
                                             <div class="col-md-8">
                                                 <input type="date" class="form-control form-control-sm" v-model="form.fecha_prestamo" title="Fecha Préstamo"
                                                     :class="{ 'is-invalid': form.errors.fecha_prestamo }"
-                                                    id="fecha_prestamo">
+                                                    id="fecha_prestamo"
+                                                    :readonly="form.estado_crud=='mostrar'"
+                                                />
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="row">
-                                            <label for="frecuencia_pago_id" class="col-form-label col-form-label-sm col-md-3">Frecuencia Pago</label>
-                                            <div class="col-md-9">
-                                                <select class="form-control form-control-sm" v-model="form.frecuencia_pago_id"
-                                                    @change="valorInteres">
-                                                    <option value="">-SELECCIONAR-</option>
-                                                    <option v-for="moneda in frecuenciaPagos" :key="moneda.id" :value="moneda.id"
-                                                            v-text="moneda.nombre"></option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>                                
-                                </div>
-                                <div class="form-group row">
-                                    <div class="col-md-4">
-                                        <div class="row">
-                                            <label for="monto" class="col-form-label col-form-label-sm col-md-4">Monto</label>
-                                            <div class="col-md-8">
-                                                <input type="text" class="form-control form-control-sm" v-model="form.capital_inicial" title="Capital Inicial"
-                                                    :class="{ 'is-invalid': form.errors.capital_inicial }" placeholder="0.00" />
-                                            </div>
-                                        </div>
-
                                     </div>
                                     <div class="col-md-6">
                                         <div class="row">
                                             <label for="frecuencia_pago_id" class="col-form-label col-form-label-sm col-md-3">Aplicar Interés a</label>
                                             <div class="col-md-9">
-                                                <select class="form-control form-control-sm" v-model="form.aplicacion_interes_id">
+                                                <select class="form-control form-control-sm" v-model="form.aplicacion_interes_id"
+                                                    :readonly="form.estado_crud=='mostrar'">
                                                     <option value="">-SELECCIONAR-</option>
                                                     <option v-for="aplica in aplicacionIntereses" :key="aplica.id" :value="aplica.id"
                                                             v-text="aplica.nombre"></option>
@@ -284,6 +346,37 @@ const guardar = async() => {
                                             </div>
                                         </div>
                                     </div>
+                                                                    
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-4">
+                                        <div class="row">
+                                            <label for="frecuencia_pago_id" class="col-form-label col-form-label-sm col-md-4">Frecuencia Pago</label>
+                                            <div class="col-md-8">
+                                                <select class="form-control form-control-sm" v-model="form.frecuencia_pago_id"
+                                                    :readonly="form.estado_crud=='mostrar'"
+                                                    @change="valorInteres"
+                                                >
+                                                    <option value="">-SELECCIONAR-</option>
+                                                    <option v-for="moneda in frecuenciaPagos" :key="moneda.id" :value="moneda.id"
+                                                            v-text="moneda.nombre"></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <label for="monto" class="col-form-label col-form-label-sm col-md-3">Capital Inicial</label>
+                                            <div class="col-md-9">
+                                                <input type="text" class="form-control form-control-sm" v-model="form.capital_inicial" title="Capital Inicial"
+                                                    :class="{ 'is-invalid': form.errors.capital_inicial }" placeholder="0.00" 
+                                                    :readonly="form.estado_crud=='mostrar'"
+                                                />
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                   
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-md-4">
@@ -291,7 +384,9 @@ const guardar = async() => {
                                             <label for="monto" class="col-form-label col-form-label-sm col-md-4">Interés</label>
                                             <div class="col-md-8">
                                                 <input type="text" class="form-control form-control-sm" v-model="form.interes" title="Interés"
-                                                    :class="{ 'is-invalid': form.errors.interes }" placeholder="0.00" />
+                                                    :class="{ 'is-invalid': form.errors.interes }" placeholder="0.00" 
+                                                    :readonly="form.estado_crud=='mostrar'"
+                                                />
                                             </div>
                                         </div>
                                     </div>
@@ -300,7 +395,9 @@ const guardar = async() => {
                                             <label for="numero_cuotas" class="col-form-label col-form-label-sm col-md-3">Número cuotas</label>
                                             <div class="col-md-9">
                                                 <input type="text" class="form-control form-control-sm" v-model="form.numero_cuotas" title="Número de Cuotas"
-                                                    :class="{ 'is-invalid': form.errors.numero_cuotas }" placeholder="0.00" />
+                                                    :class="{ 'is-invalid': form.errors.numero_cuotas }" placeholder="0.00" 
+                                                    :readonly="form.estado_crud=='mostrar'"
+                                                />
                                             </div>
                                         </div>
                                     </div>
@@ -311,7 +408,9 @@ const guardar = async() => {
                                             <label for="interes_moratorio" class="col-form-label col-form-label-sm col-md-4">Interés Mora</label>
                                             <div class="col-md-8">
                                                 <input type="text" class="form-control form-control-sm" v-model="form.interes_moratorio" title="Interés Moratorio"
-                                                    :class="{ 'is-invalid': form.errors.interes_moratorio }" placeholder="0.00" />
+                                                    :class="{ 'is-invalid': form.errors.interes_moratorio }" placeholder="0.00" 
+                                                    :readonly="form.estado_crud=='mostrar'"
+                                                />
                                             </div>
                                         </div>
                                     </div>
@@ -320,7 +419,9 @@ const guardar = async() => {
                                             <label for="monto" class="col-form-label col-form-label-sm col-md-3">Días de gracia</label>
                                             <div class="col-md-9">
                                                 <input type="text" class="form-control form-control-sm" v-model="form.dias_gracia" title="Número de Cuotas"
-                                                    :class="{ 'is-invalid': form.errors.numero_cuotas }" placeholder="0" />
+                                                    :class="{ 'is-invalid': form.errors.numero_cuotas }" placeholder="0" 
+                                                    :readonly="form.estado_crud=='mostrar'"
+                                                />
                                             </div>
                                         </div>
                                     </div>
@@ -355,6 +456,9 @@ const guardar = async() => {
         <div class="card-footer">  
             <div class="row">
                 <div class="col-md-12 text-center">
+                    <button type="submit" class="btn btn-danger mr-3" @click.prevent="cancelar">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
                     <span v-if="form.estado_crud!='mostrar'">
                         <button type="submit" class="btn btn-success" @click.prevent="guardar">
                             <span v-if="form.estado_crud=='nuevo'"><i class="fas fa-save"></i> Guardar</span>
