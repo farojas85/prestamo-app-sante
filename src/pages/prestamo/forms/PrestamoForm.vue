@@ -100,6 +100,7 @@ const limpiar = () => {
     form.value.dias_gracia=0;
     //form.value.total=0;
     //form.value.valor_cuota=0;
+    form.value.cuotas = [];
     form.value.estado_crud='';
     form.value.errors = [];
     errors.value = [];
@@ -338,7 +339,7 @@ const cancelar = () => {
                                             <label for="frecuencia_pago_id" class="col-form-label col-form-label-sm col-md-3">Aplicar Interés a</label>
                                             <div class="col-md-9">
                                                 <select class="form-control form-control-sm" v-model="form.aplicacion_interes_id"
-                                                    :readonly="form.estado_crud=='mostrar'">
+                                                    :disabled="form.estado_crud=='mostrar'">
                                                     <option value="">-SELECCIONAR-</option>
                                                     <option v-for="aplica in aplicacionIntereses" :key="aplica.id" :value="aplica.id"
                                                             v-text="aplica.nombre"></option>
@@ -354,7 +355,7 @@ const cancelar = () => {
                                             <label for="frecuencia_pago_id" class="col-form-label col-form-label-sm col-md-4">Frecuencia Pago</label>
                                             <div class="col-md-8">
                                                 <select class="form-control form-control-sm" v-model="form.frecuencia_pago_id"
-                                                    :readonly="form.estado_crud=='mostrar'"
+                                                    :disabled="form.estado_crud=='mostrar'"
                                                     @change="valorInteres"
                                                 >
                                                     <option value="">-SELECCIONAR-</option>

@@ -2,7 +2,7 @@
 import { createApp, h } from 'vue';
 import { createPinia } from 'pinia';
 // import './bootstrap';
-// import './style.css';
+import './style.css';
 import App from './App.vue';
 import router from './router';
 import SweetAlert2 from  'sweetalert2';

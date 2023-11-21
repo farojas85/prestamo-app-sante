@@ -1,9 +1,10 @@
 <script setup>
 import { ref, toRefs, onMounted } from 'vue';
-import PrestamoFrom from './forms/PrestamoForm.vue';
 import { usePrestamo } from '../../composables/prestamo/prestamos';
 import { useDatosSession } from '../../composables/session';
 import { useHelper } from '../../helpers';
+import PrestamoFrom from './forms/PrestamoForm.vue';
+import CuotasForm from './forms/CuotaForm.vue';
 
 const { usuario, roles, puede} = useDatosSession();
 
@@ -49,6 +50,7 @@ const limpiar = () => {
     form.value.aplicacion_mora_id='';
     form.value.interes_moratorio=2.5;
     form.value.dias_gracia=0;
+    form.value.cuotas = [];
     // form.value.total=0;
     // form.value.valor_cuota=0;
     form.value.estado_crud='';
@@ -265,7 +267,6 @@ const editar = async (id) => {
     await obtenerPrestamo(id);
     form.value.estado_crud = 'editar'
     cardTitle.value = 'Editar Préstamo';
-    console.log(respuesta.value)
     if(respuesta.value.ok==1)
     {
         form.value.id = prestamo.value.id;
@@ -287,7 +288,7 @@ const editar = async (id) => {
         form.value.aplicacion_mora_id= prestamo.value.aplicacion_mora_id;
         form.value.interes_moratorio= prestamo.value.interes_moratorio ;
         form.value.dias_gracia= prestamo.value.dias_gracia;
-        form.value.total= prestamo.value.total;
+        //form.value.total= prestamo.value.total;
         // form.value.valor_cuota= "";
         form.value.es_activo= (prestamo.value.es_activo== 1) ? true : false ;
         
@@ -299,7 +300,6 @@ const mostrar = async (id) => {
     await obtenerPrestamo(id);
     form.value.estado_crud = 'mostrar'
     cardTitle.value = 'Mostrar Préstamo';
-    console.log(respuesta.value)
     if(respuesta.value.ok==1)
     {
         form.value.id = prestamo.value.id;
@@ -321,15 +321,47 @@ const mostrar = async (id) => {
         form.value.aplicacion_mora_id= prestamo.value.aplicacion_mora_id;
         form.value.interes_moratorio= prestamo.value.interes_moratorio ;
         form.value.dias_gracia= prestamo.value.dias_gracia;
-        form.value.total= prestamo.value.total;
+        //form.value.total= prestamo.value.total;
         // form.value.valor_cuota= "";
-        form.value.es_activo= (prestamo.value.es_activo== 1) ? true : false ;
+        //form.value.es_activo= (prestamo.value.es_activo== 1) ? true : false ;
         
     }
 }
 
 const imprimirContrato = (id) => {
     imprimirContratoPrestamo(id);
+}
+
+const verCuotas = async(id) => {
+    limpiar();
+    await obtenerPrestamo(id);
+    form.value.estado_crud = ''
+    if(respuesta.value.ok==1)
+    {
+        form.value.id = prestamo.value.id;
+        form.value.cliente_id= prestamo.value.cliente_id;
+        form.value.nombres = prestamo.value.nombres;
+        form.value.apellido_paterno = prestamo.value.apellido_paterno;
+        form.value.apellido_materno = prestamo.value.apellido_materno;
+        form.value.numero_documento = prestamo.value.numero_documento;
+        form.value.telefono = prestamo.value.telefono;
+        form.value.direccion = prestamo.value.direccion;
+        form.value.fecha_prestamo= prestamo.value.fecha_prestamo;
+        form.value.user_id= prestamo.value.user_id;
+        // form.value.role= "";
+        form.value.frecuencia_pago_id= prestamo.value.frecuencia_pago_id;
+        form.value.capital_inicial= prestamo.value.capital_inicial;
+        form.value.aplicacion_interes_id= prestamo.value.aplicacion_interes_id;
+        form.value.interes= prestamo.value.interes;
+        form.value.numero_cuotas= prestamo.value.numero_cuotas   ;
+        form.value.aplicacion_mora_id= prestamo.value.aplicacion_mora_id;
+        form.value.interes_moratorio= prestamo.value.interes_moratorio ;
+        form.value.dias_gracia= prestamo.value.dias_gracia;
+        //form.value.total= prestamo.value.total;
+        form.value.cuotas = prestamo.value.cuotas;
+        $('#modal-cuota-title').html('PRÉSTAMO - CUOTAS')
+        $('#modal-cuota').modal('show')
+    }
 }
 
 
@@ -435,12 +467,18 @@ const imprimirContrato = (id) => {
                                                     v-if="puede('prestamos.editar')">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
-                                                <button class="btn btn-info btn-sm mr-1"
+                                                <button class="btn bg-purple btn-sm mr-1"
+                                                    title="Ver Cuotas"
+                                                    @click.prevent="verCuotas(presta.id)"
+                                                    v-if="!['Generado','Observado','Rechazado'].includes(presta.nombre_operacion) && puede('prestamos.ver-cuotas')">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <!-- <button class="btn btn-info btn-sm mr-1"
                                                     title="Mostrar Préstamo"
                                                     @click.prevent="mostrar(presta.id)"
                                                     v-if="puede('prestamos.mostrar')">
                                                     <i class="fas fa-eye"></i>
-                                                </button>
+                                                </button> -->
                                                 <button class="btn bg-orange btn-sm mr-1"
                                                     title="Mostrar Observaciones Préstamo"
                                                     @click.prevent=""
@@ -454,12 +492,7 @@ const imprimirContrato = (id) => {
                                                     >
                                                     <i class="fas fa-file-lines"></i>
                                                 </button>
-                                                <button class="btn bg-purple btn-sm mr-1"
-                                                    title="Ver Cuotas"
-                                                    @click.prevent=""
-                                                    v-if="!['Generado','Observado','Rechazado'].includes(presta.nombre_operacion) && puede('prestamos.ver-cuotas')">
-                                                    <i class="fas fa-check-to-slot"></i>
-                                                </button>
+                                                
                                                 <button class="btn btn-success btn-sm mr-1"
                                                     title="Enviar Notificaciones Préstamo"
                                                     @click.prevent=""
@@ -501,4 +534,5 @@ const imprimirContrato = (id) => {
             <PrestamoFrom :form="form" :cardTitle="cardTitle" @onListar="listar"></PrestamoFrom>
         </div>
     </div>
+    <CuotasForm :form="form"></CuotasForm>
 </template>

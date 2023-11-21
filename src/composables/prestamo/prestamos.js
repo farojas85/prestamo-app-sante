@@ -47,6 +47,7 @@ export const usePrestamo = () => {
         dias_gracia:0,
         total:0,
         valor_cuota:0,
+        cuotas:[],
         es_activo:1,
         estado_crud:'',
         errors:[]
@@ -306,7 +307,7 @@ export const usePrestamo = () => {
     const imprimirContratoPrestamo = async(id) => {
         await obtenerPrestamo(id);
 
-        const doc = new jsPDF({ orientation: "p", unit: "mm", format: "a4" });
+        const doc = new jsPDF({ orientation: "p", unit: "mm", format: "A4" });
 
         //let persona = prestamo.value.persona;
         let apellidos_nombres = (prestamo.value.apellido_paterno+' '+prestamo.value.apellido_materno+' '+prestamo.value.nombres) ?? "";
@@ -343,9 +344,9 @@ export const usePrestamo = () => {
 
         doc.setFontSize(11).setFont('arial','normal','bold').text("PRIMERO:",30,80)
         doc.setLineDash([1, 0], 0).line(30, 81, 50, 81);
-        doc.setFontSize(11).setFont('arial','normal','').text("EL PRESTAMISTA hará entrega en concepto de préstamo a EL ACREEDOR",52,80)
+        doc.setFontSize(11).setFont('arial','normal','').text("EL PRESTAMISTA hará entrega en concepto de préstamo a EL ACREEDOR, que",52,80)
         // doc.setFontSize(11).setFont('arial','normal','bold').text(role,131,80)
-        doc.setFontSize(11).setFont('arial','normal','').text("asumiendo las funciones de gestión de clientes, realizar préstamos, emisión y revisión de pagos,",30,85)
+        doc.setFontSize(11).setFont('arial','normal','').text("reconoce ",30,85)
         doc.setFontSize(11).setFont('arial','normal','').text("y toda otra labor relacionada que le encarge EL PRESTAMISTA, teniendo bajo su responsabilidad",30,90)
         doc.setFontSize(11).setFont('arial','normal','').text("cada préstamo y pago que lo emita.",30,95)
 
@@ -367,6 +368,79 @@ export const usePrestamo = () => {
         doc.save('CONTRATO_PRESTAMO.pdf');
 
     }
+
+    const descargarCuotas = (cuota) => {
+        
+        let apellidos_nombres = (cuota.apellido_paterno+' '+cuota.apellido_materno+' '+cuota.nombres) ?? "";
+        const doc = new jsPDF({ orientation: "p", unit: "mm", format: "A4" });
+        
+        doc.setFontSize(14).setFont("times",'normal')
+        doc.text('PRÉSTAMOS - CUOTAS',105,30,'center');
+
+        doc.setFontSize(18).setFont("times",'bold')
+        doc.text(apellidos_nombres,105,40,'center')
+        doc.setDrawColor(0);
+        doc.setLineWidth(0.2);
+        doc.setFillColor(0, 0, 255)
+        // doc.rect(15,50,60,20,'D')
+        //------------------------------------------------------------
+        doc.setTextColor("#007bff")
+        doc.setFontSize(12).setFont("times",'bold')
+        doc.text('Monto Préstamo',45,58,'center');
+        doc.setFontSize(18).setFont("times",'normal')
+        doc.text('S/ '+ cuota.capital_inicial,45,65,'center');
+        doc.line(75,50,75,70,'D')
+        //-------------------------------------------------------------
+        doc.setTextColor("#28a745")
+        doc.setFontSize(12).setFont("times",'bold')
+        doc.text('Tasa de Interés',105,58,'center');
+        doc.setFontSize(18).setFont("times",'normal')
+        doc.text(cuota.interes+' %',105,65,'center');
+        doc.line(135,50,135,70,'D')
+        //-------------------------------------------------------------
+        doc.setTextColor("#007bff")
+        doc.setFontSize(12).setFont("times",'bold')
+        doc.text('Número de Cuotas',165,58,'center');
+        doc.setFontSize(18).setFont("times",'normal')
+        doc.text(cuota.numero_cuotas+' %',165,65,'center');
+        //-------------------------------------------------------------
+
+        doc.setFontSize(16).setFont("times",'bold')
+        doc.text("CRONOGRAMA DE PAGOS",105,80,'center')
+
+        //------------------------------------------------------------
+        //Detalle Cuotas
+        //------------------------------------------------------------
+        doc.setLineWidth(0.2);
+        doc.rect(30,90,20,10,'D')
+        doc.rect(50,90,50,10,'D')
+        doc.rect(100,90,50,10,'D')
+        doc.rect(150,90,30,10,'D')
+
+        doc.setTextColor(0,0,0)
+        doc.setFontSize(12).setFont("times",'bold')
+        doc.text("Nro.",40,96,'center')
+        doc.text("Descripción",75,96,'center')
+        doc.text("Vencimiento",125,96,'center')
+        doc.text("Monto",165,96,'center')
+
+        let y=100;
+        doc.setFontSize(12).setFont("times",'normal')
+        cuota.cuotas.forEach( c => {
+            doc.rect(30,y,20,10,'D')
+            doc.rect(50,y,50,10,'D')
+            doc.rect(100,y,50,10,'D')
+            doc.rect(150,y,30,10,'D')
+            let yt = y+6;
+            doc.text(c.numero_cuota.toString(),40,yt,'center')
+            doc.text(c.descripcion.toString(),75,yt,'center')
+            doc.text(c.fecha_vencimiento.toString(),125,yt,'center')
+            doc.text(c.monto_cuota.toString(),165,yt,'center')
+            y+=10;
+        })
+
+        doc.save('CUOTAS_PRESTAMO.pdf');
+    }
     
     return {
         errors, respuesta, prestamos, dato, form, frecuenciaPagos, aplicacionIntereses, persona,
@@ -375,7 +449,7 @@ export const usePrestamo = () => {
         cambiarPagina, cambiarPaginacion, obtenerValorInteres,
         obtenerListaFrecuenciaPagos, obtenerListaAplicacionInrtereses, buscarClienteExiste,
         agregrarPrestamo, modificarEstadoPrestamo, eliminarPermanentePrestamo, obtenerPrestamo,
-        actualizarPrestamo, imprimirContratoPrestamo
+        actualizarPrestamo, imprimirContratoPrestamo, descargarCuotas
     }
 
 }
