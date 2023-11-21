@@ -26,14 +26,14 @@ const descargar = () => {
                 <div class="modal-header">
                     <h6 class="modal-title" id="modal-cuota-title">Pr&eacute;stamo - Cuotas</h6>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true"><i class="fas fa-times"></i></span>
                     </button>
                 </div>
                 <div class="modal-body" id="datos-descargar">
                     <div class="form-group row">
                         <div class="col-md-12 text-center">
                             <template v-if="form.nombres">
-                                <h4>{{form.nombres+' 'form.apellido_paterno+' '+form.apellido_materno }}</h4>
+                                <h4>{{form.nombres+' '+form.apellido_paterno+' '+form.apellido_materno }}</h4>
                             </template>
 
                         </div>
