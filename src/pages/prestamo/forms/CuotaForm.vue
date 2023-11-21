@@ -32,7 +32,7 @@ const descargar = () => {
                 <div class="modal-body" id="datos-descargar">
                     <div class="form-group row">
                         <div class="col-md-12 text-center">
-                            <h4>FREDY ALONZO ROJAS BERROSPI</h4>
+                            <h4>{{ form.nombres+' 'form.apellido_paterno+' '+form.apellido_materno }}</h4>
 
                         </div>
                     </div>
