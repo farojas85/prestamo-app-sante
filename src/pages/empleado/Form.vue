@@ -100,10 +100,20 @@ const crud = {
 
 const listarProvincias = async() => {
     await obteneListaProvincias(form.value.departamento_id);
+    if(form.value.estado_crud != 'nuevo')
+    {
+        form.value.provincias = provincias.value
+        form.value.provincia_id = ""
+    }
 }
 
 const listarDistritos = async() => {
     await obteneListaDistritos(form.value.provincia_id);
+    if(form.value.estado_crud != 'nuevo')
+    {
+        form.value.distritos = distritos.value;
+        form.value.distrito_id = ""
+    }
 }
 
 const listarSuperioresPorRole = async() => {
@@ -245,7 +255,21 @@ const guardar = () => {
                                                     <small class="text-danger" v-for="error in form.errors.departamento_id" :key="error">{{error }}</small>
                                                 </div>
                                             </div>
-                                            <div class="form-group row">
+                                            <div class="form-group row" v-if="form.estado_crud=='nuevo'">
+                                                <label for="provincia" class="col-form-label col-form-label-sm col-md-3 mb-1">Provincia:</label>
+                                                <div class="col-md-9 mb-1">
+                                                    <select class="form-control form-control-sm"
+                                                        v-model="form.provincia_id" id="provincia"
+                                                        :class="{ 'is-invalid' : form.errors.provincia_id}"
+                                                        :disabled="form.estado_crud=='mostrar'"
+                                                        @change="listarDistritos">
+                                                        <option value="">-Seleccionar-</option>
+                                                        <option v-for="prov in provincias" :value="prov.id" >{{ prov.nombre }}</option>
+                                                    </select>
+                                                    <small class="text-danger" v-for="error in form.errors.provincia_id" :key="error">{{error }}</small>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row" v-else-if="form.estado_crud!=='nuevo'">
                                                 <label for="provincia" class="col-form-label col-form-label-sm col-md-3 mb-1">Provincia:</label>
                                                 <div class="col-md-9 mb-1">
                                                     <select class="form-control form-control-sm"
@@ -259,7 +283,20 @@ const guardar = () => {
                                                     <small class="text-danger" v-for="error in form.errors.provincia_id" :key="error">{{error }}</small>
                                                 </div>
                                             </div>
-                                            <div class="form-group row">
+                                            <div class="form-group row" v-if="form.estado_crud=='nuevo'">
+                                                <label for="distrito" class="col-form-label col-form-label-sm col-md-3 mb-1">Distrito:</label>
+                                                <div class="col-md-9 mb-1">
+                                                    <select class="form-control form-control-sm"
+                                                        v-model="form.distrito_id" id="distrito"
+                                                        :class="{ 'is-invalid' : form.errors.distrito_id}"
+                                                        :disabled="form.estado_crud=='mostrar'">
+                                                        <option value="">-Seleccionar-</option>
+                                                        <option v-for="dist in distritos" :value="dist.id" >{{ dist.nombre }}</option>
+                                                    </select>
+                                                    <small class="text-danger" v-for="error in form.errors.distrito_id" :key="error">{{error }}</small>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row" v-else-if="form.estado_crud!=='nuevo'">
                                                 <label for="distrito" class="col-form-label col-form-label-sm col-md-3 mb-1">Distrito:</label>
                                                 <div class="col-md-9 mb-1">
                                                     <select class="form-control form-control-sm"
