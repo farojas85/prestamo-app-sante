@@ -7,8 +7,9 @@ import ClienteForm from './Form.vue';
 const { Toast, Swal } = useHelper();
 const {
     form, dato, clientes, errors, respuesta, cliente,
+    provincias,distritos,
     listar, buscar, isActived, pagesNumber, cambiarPaginacion, cambiarPagina,
-    limpiar,
+    limpiar, obtenerCliente
 } = useCliente();
 
 
@@ -25,6 +26,48 @@ const nuevo = () => {
 
     $('#modal-cliente').modal('show')
 }
+
+const obtenerDatos = async(id) => {
+    limpiar();
+    await obtenerCliente(id);
+    let dato = cliente.value;
+    let person = dato.persona;
+    let emple = dato.cliente;
+
+
+    form.value.id = id;
+    form.value.tipo_documento_id = person.tipo_documento_id ?? '';
+    form.value.numero_documento = person.numero_documento;
+    form.value.sexo_id = person.sexo_id ?? '';
+    form.value.nombres = person.nombres;
+    form.value.apellido_paterno = person.apellido_paterno;
+    form.value.apellido_materno = person.apellido_materno;
+    form.value.telefono = person.telefono;
+    form.value.direccion = person.direccion;
+    form.value.persona_id = emple.persona_id ?? '';
+    form.value.user_id = emple.user_id ?? '';
+    form.value.departamento_id = dato.departamento?.id ?? '';
+    form.value.provincia_id = dato.provincia?.id ?? '';
+    form.value.distrito_id = dato.distrito?.id ?? '';
+    form.value.superior_id = emple.superior_id ?? '';
+    // departamentos.value = dato.departamentos ?? [];
+    form.value.provincias = dato.provincias ?? [];
+    form.value.distritos = dato.distritos ?? [];
+    form.value.cuentas_bancarias = dato.cliente_cuentas
+    form.value.es_activo = emple.es_activo == 1 ? true : false
+}
+
+
+const editar = (id) => {
+    limpiar();
+    obtenerDatos(id);
+    form.value.estado_crud = 'editar';
+    (
+        document.getElementById('modal-cliente-title')
+    ).innerHTML ="Editar Cliente";
+
+    $('#modal-cliente').modal('show')
+}
 </script>
 <template>
     <div class="card card-primary card-outline">
@@ -33,7 +76,7 @@ const nuevo = () => {
                 Listado de Clientes
                 <a class="btn btn-danger btn-sm ml-1"
                     @click.prevent="nuevo" >
-                    <i class="fa fa-plus"></i>
+                    <i class="fa fa-plus"></i> Nuevo
                 </a>
             </h6>
         </div>

@@ -16,6 +16,7 @@ export const useCliente = () => {
     const departamentos = ref([]);
     const provincias = ref([]);
     const distritos = ref([]);
+    const entidad_financieras = ref([]);
  
     const dato = ref({
         page: 1,
@@ -35,6 +36,13 @@ export const useCliente = () => {
         direccion:'',
         name:'',
         persona_id:'',
+        departamento_id:'',
+        provincia_id:'',
+        distrito_id:'',
+        departamentos:[],
+        provincias:[],
+        distritos:[],
+        cuentas_bancarias:[],
         es_activo:1,
         estado_crud:'',
         errors:[]
@@ -51,11 +59,26 @@ export const useCliente = () => {
         form.value.telefono='';
         form.value.direccion='';
         form.value.persona_id='';
+        form.value.departamento_id='';
+        form.value.provincia_id='';
+        form.value.distrito_id='';
+        form.value.departamentos=[];
+        form.value.provincias=[];
+        form.value.distritos=[];
+        form.value.cuentas_bancarias=[];
         form.value.es_activo=1;
         form.value.estado_crud='';
         form.value.errors = [];
         errors.value = [];
     }
+
+    const cuenta_bancaria = ref({
+        id:'',
+        cliente_id:'',
+        entidad_financiera_id:'',
+        banco:'',
+        numero_cuenta:''
+    })
 
     const offest = ref(2);
 
@@ -145,22 +168,37 @@ export const useCliente = () => {
         }
     }
 
-    const buscarDatosDni = async(data) => {
-        try {
-            
-            let respond = await prestamoApi.get('/api/personas/dni?numero_documento='+data.numero_documento+'&tipo_documento_id='+data.tipo_documento_id, config)
-           
-            persona.value = JSON.parse(jwtDecode(respond.data).personaDni);
+    const obtenerListaEntidadFinancieras = async () => {
+        let respond = await prestamoApi.get('/api/entidad-financieras/list',config)
+
+        if(respond.status == 404)
+        {
+            errors.value = respond.data.error
         }
-        catch (error) {
-            errors.value = [];
-            // if(error.response.status == 422) {
-            //     errors.value = error.response.data.errors
-            // }
-            // if(error.response.status == 404)
-            // {
-            //     errors.value = respond.data.error
-            // }
+
+        if(respond.status == 200)
+        {
+            entidad_financieras.value = jwtDecode(respond.data).entidad_financieras
+        }
+    }
+
+
+    const buscarDatosDni = async(data) => {
+        let respond = await prestamoApi.get('/api/personas/dni?numero_documento='+data.numero_documento+'&tipo_documento_id='+data.tipo_documento_id, config)
+       
+        if(respond.status === 422)
+        {
+            errors.value = respond.data;
+        }
+
+        if(respond.status === 200)
+        {
+            let dato = jwtDecode(respond.data);
+
+            persona.value = dato.personaDni.data;
+            if(dato.personaDni.tipo == 2){
+                persona.value = JSON.parse(dato.personaDni.data);
+            }
         }
     }
 
@@ -189,6 +227,7 @@ export const useCliente = () => {
         if(respond.status == 200)
         {
             provincias.value = jwtDecode(respond.data).provincias
+            form.value.provincia_id = ""
         }
     }
 
@@ -203,8 +242,17 @@ export const useCliente = () => {
         if(respond.status == 200)
         {
             distritos.value = jwtDecode(respond.data).distritos
+            form.value.distrito_id =""
         }
     }
+
+    const obtenerCliente = async(id) => {
+
+        let respond = await prestamoApi.get('/api/clientes/show?id='+id,config);
+
+        cliente.value = jwtDecode(respond.data).cliente
+    }
+
 
     const agregarCliente = async(data) => {
         errors.value = [];
@@ -228,15 +276,32 @@ export const useCliente = () => {
         }
     }
 
+    const actualizarCliente= async(data) => {
+        errors.value = ''
+        try {
+            let responded = await prestamoApi.put('api/clientes/'+data.id,data,configPost)
+            responded = jwtDecode(responded.data)
+            errors.value =''
+            if(responded.ok==1){
+                respuesta.value=responded
+            }
+
+        } catch (error) {
+            errors.value=""
+            if(error.response.status === 422) {
+                errors.value = error.response.data.errors
+            }
+        }
+    }
 
     
     return {
         errors, respuesta, cliente, clientes, dato, form, tipoDocumentos, sexos, persona,
-        departamentos, provincias, distritos,
+        departamentos, provincias, distritos, entidad_financieras, cuenta_bancaria,
         listar, obtenerClientes, buscar, isActived, pagesNumber,
         cambiarPagina, cambiarPaginacion, limpiar, obtenerListaTipoDocumentos, obtenerListaSexos,
-        obteneListaDepartamentos, obteneListaProvincias, obteneListaDistritos,
-        buscarDatosDni, agregarCliente
+        obteneListaDepartamentos, obteneListaProvincias, obteneListaDistritos, obtenerListaEntidadFinancieras,
+        buscarDatosDni, agregarCliente, obtenerCliente, actualizarCliente
     }
 
 }

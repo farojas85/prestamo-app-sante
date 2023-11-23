@@ -146,7 +146,7 @@ const guardar = () => {
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="numero_documento" class="col-form-label col-form-label-sm col-md-3 mb-1"> Nro.   Documento:</label>
+                                        <label for="numero_documento" class="col-form-label col-form-label-sm col-md-3 mb-1"> Nro. Documento:</label>
                                         <div class="col-md-9 mb-1">
                                             <input type="text" class="form-control form-control-sm" id="numero_documento"
                                                 maxlength="15"    v-model="form.numero_documento" :disabled="form.estado_crud=='mostrar'"

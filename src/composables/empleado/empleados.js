@@ -213,7 +213,7 @@ export const useEmpleado = () => {
 
         if(respond.status == 200)
         {
-            form.value.provincias = jwtDecode(respond.data).provincias
+            provincias.value = jwtDecode(respond.data).provincias
         }
     }
 
@@ -227,7 +227,7 @@ export const useEmpleado = () => {
 
         if(respond.status == 200)
         {
-            form.value.distritos = jwtDecode(respond.data).distritos
+            distritos.value = jwtDecode(respond.data).distritos
         }
     }
 
@@ -246,18 +246,20 @@ export const useEmpleado = () => {
     }
 
     const buscarDatosDni = async(data) => {
-        try {
-            
-            let respond = await prestamoApi.get('/api/personas/dni?numero_documento='+data.numero_documento+'&tipo_documento_id='+data.tipo_documento_id, config)
-            persona.value = JSON.parse(jwtDecode(respond.data).personaDni);
-        } catch (error) {
-            errors.value = [];
-            if(error.response.status === 422) {
-                errors.value = error.response.data.errors
-            }
-            if(error.response.status == 404)
-            {
-                errors.value = respond.data.error
+        let respond = await prestamoApi.get('/api/personas/dni?numero_documento='+data.numero_documento+'&tipo_documento_id='+data.tipo_documento_id, config)
+       
+        if(respond.status === 422)
+        {
+            errors.value = respond.data;
+        }
+
+        if(respond.status === 200)
+        {
+            let dato = jwtDecode(respond.data);
+
+            persona.value = dato.personaDni.data;
+            if(dato.personaDni.tipo == 2){
+                persona.value = JSON.parse(dato.personaDni.data);
             }
         }
     }

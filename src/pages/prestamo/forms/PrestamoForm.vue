@@ -169,12 +169,12 @@ const buscaExisteCliente = async() => {
 }
 
 const valorInteres = () => {
-    // if(form.value.frecuencia_pago_id!= "")
-    // {
-    //     let frecuencia = frecuenciaPagos.value.find(f => f.id === form.value.frecuencia_pago_id)
-    //     console.log(frecuencia)
-    //     form.value.interes = parseFloat(frecuencia.valor_interes).toFixed(2)
-    // }
+    if(form.value.frecuencia_pago_id!= "")
+    {
+        let frecuencia = frecuenciaPagos.value.find(f => f.id === form.value.frecuencia_pago_id)
+        console.log(frecuencia)
+        form.value.interes = parseFloat(frecuencia.valor_interes).toFixed(2)
+    }
 }
 
 const crud = {
@@ -247,7 +247,7 @@ const cancelar = () => {
                                                     v-model="form.numero_documento"
                                                     maxlength="15" @keypress="soloNumeros" 
                                                     @change="buscaExisteCliente" :readonly="form.estado_crud=='mostrar'"/>
-                                                <div class="input-group-append">
+                                                <!-- <div class="input-group-append">
                                                     <button type="button" class="btn btn-danger" @click="nuevoCliente"
                                                         v-if="form.estado_crud=='nuevo'">
                                                         <i class="fas fa-plus"></i>
@@ -256,8 +256,7 @@ const cancelar = () => {
                                                         v-if="form.estado_crud=='editar'">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
-                                                    <!-- <span class="input-group-text" id="basic-addon1">N&uacute;mero documento</span> -->
-                                                </div>
+                                                </div> -->
                                             </div>
                                             <small class="text-danger" v-if="errorBusqueda">{{ errorBusqueda }}</small>
                                         </div>
