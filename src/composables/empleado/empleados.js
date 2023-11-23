@@ -299,7 +299,7 @@ export const useEmpleado = () => {
     const actualizarEmpleado= async(data) => {
         errors.value = ''
         try {
-            let responded = await prestamoApi.put('api/empleados/'+data.id,data,configPost)
+            let responded = await prestamoApi.post('api/empleados/update',data,configPost)
             responded = jwtDecode(responded.data)
             errors.value =''
             if(responded.ok==1){
