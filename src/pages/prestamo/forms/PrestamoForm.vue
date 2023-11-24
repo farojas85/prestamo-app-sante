@@ -64,7 +64,17 @@ form.value.total = computed(() => {
     {
         return 0;
     }
-    return (Math.round( (parseFloat(form.value.capital_inicial)*( 1 + (parseFloat(form.value.interes)/100)))*100 )/100).toFixed(2) ;
+
+    if(form.value.aplicacion_interes_id == 2)
+    {
+        let interes_capital = form.value.interes*form.value.numero_cuotas;
+        let capital = Math.round((form.value.capital_inicial*(1 + interes_capital/100))*100/100).toFixed(2);
+        return capital;
+    }
+    else {
+        return (Math.round( (parseFloat(form.value.capital_inicial)*( 1 + (parseFloat(form.value.interes)/100)))*100 )/100).toFixed(2) ;
+
+    }
 });
 
 form.value.valor_cuota = computed(() => {
