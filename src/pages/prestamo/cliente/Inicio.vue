@@ -3,13 +3,14 @@ import { ref, onMounted } from 'vue';
 import { useHelper } from '../../../helpers';
 import { useCliente } from '../../../composables/prestamo/clientes';
 import ClienteForm from './Form.vue';
+import VerDocumentosForm from './modals/VerDocumentos.vue';
 
 const { Toast, Swal } = useHelper();
 const {
     form, dato, clientes, errors, respuesta, cliente,
-    provincias,distritos,
+    provincias,distritos, archivos,
     listar, buscar, isActived, pagesNumber, cambiarPaginacion, cambiarPagina,
-    limpiar, obtenerCliente
+    limpiar, obtenerCliente, subirAnversoDni, subirReversoDni, verDocumentos
 } = useCliente();
 
 
@@ -67,6 +68,81 @@ const editar = (id) => {
     ).innerHTML ="Editar Cliente";
 
     $('#modal-cliente').modal('show')
+}
+
+const subirDniAnverso = async(id) => {
+    await obtenerDatos(id);
+    let apellidos_nombres = (form.value.apellido_paterno+' '+form.value.apellido_materno+' '+form.value.nombres) ?? "";
+
+    const { value: file } = await Swal.fire({
+        text:"De: "+apellidos_nombres,
+        title: "Subir la cara Anversa del DNI",
+        input: "file",
+        inputAttributes: {
+            "accept": "image/*",
+            "aria-label": "Subir anverso del DNI"
+        }
+    });
+
+    if (file) {
+        var formData = new FormData();
+        
+        var pdf = $('.swal2-file')[0].files[0];
+
+        formData.append("dni_anverso",file);
+        formData.append('cliente_id',id);
+
+        await  subirAnversoDni(formData);
+
+        if(respuesta.value.ok==1)
+        {
+            Toast.fire({
+                icon: 'success',
+                title: respuesta.value.mensaje
+            });
+            listar();
+        }
+    }
+}
+
+const subirDniReverso = async(id) => {
+    await obtenerDatos(id);
+    let apellidos_nombres = (form.value.apellido_paterno+' '+form.value.apellido_materno+' '+form.value.nombres) ?? "";
+
+    const { value: file } = await Swal.fire({
+        text:"De: "+apellidos_nombres,
+        title: "Subir la cara Reversa del DNI",
+        input: "file",
+        inputAttributes: {
+            "accept": "image/*",
+            "aria-label": "Subir reverso del DNI"
+        }
+    });
+
+    if (file) {
+        var formData = new FormData();
+        
+        var pdf = $('.swal2-file')[0].files[0];
+
+        formData.append("dni_reverso",file);
+        formData.append('cliente_id',id);
+
+        await  subirReversoDni(formData);
+
+        if(respuesta.value.ok==1)
+        {
+            Toast.fire({
+                icon: 'success',
+                title: respuesta.value.mensaje
+            });
+            listar();
+        }
+    }
+}
+
+const mostrarDocumentos = async(id) => {
+    await verDocumentos(id);
+    $('#mld-ver-documentos').modal('show')
 }
 </script>
 <template>
@@ -142,6 +218,22 @@ const editar = (id) => {
                                                 @click.prevent="editar(cli.id)">
                                                 <i class="fas fa-edit"></i>
                                             </button>
+                                            <button type="button" class="btn btn-primary btn-sm dropdown-toggle mr-1" 
+                                                data-toggle="dropdown">
+                                                <i class="fas fa-folder-closed"></i>
+                                            </button>
+                                            <div class="dropdown-menu table-warning">
+                                                <a class="dropdown-item" href="#" @click.prevent="subirDniAnverso(cli.id)">
+                                                    <i class="fas fa-upload fa-fw text-primary"></i> Subir DNI - Anverso
+                                                </a>
+                                                <a class="dropdown-item" href="#" @click.prevent="subirDniReverso(cli.id)">
+                                                    <i class="fas fa-upload fa-fw text-primary"></i> Subir DNI - Reverso
+                                                </a>
+                                                <a class="dropdown-item" href="#"
+                                                    @click.prevent="mostrarDocumentos(cli.id)">
+                                                    <i class="fas fa-eye fa-fw text-danger"></i> Ver Documentos
+                                                </a>
+                                            </div>
                                         </template>
 
                                     </td>
@@ -201,4 +293,5 @@ const editar = (id) => {
         </div>
     </div>
     <ClienteForm :form="form" @onListar="listar"></ClienteForm>
+    <VerDocumentosForm :archivos="archivos"></VerDocumentosForm>
 </template>

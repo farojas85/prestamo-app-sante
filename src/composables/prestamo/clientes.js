@@ -1,13 +1,15 @@
 import { ref } from "vue";
 import { jwtDecode } from 'jwt-decode';
 import { prestamoApi } from "../../api";
-import { getConfigHeader, getdataParamsPagination, getConfigHeaderPost } from "../../helpers";
+import { getConfigHeader, getdataParamsPagination, getConfigHeaderPost,getConfigHeaderUpload } from "../../helpers";
+import axios from "axios";
 
 export const useCliente = () => {
     const errors = ref([]);
     const respuesta = ref([]);
     const config = getConfigHeader();
     const configPost = getConfigHeaderPost();
+    const configUploadPost = getConfigHeaderUpload();
     const cliente = ref({});
     const clientes = ref([]);
     const tipoDocumentos = ref([]);
@@ -17,6 +19,7 @@ export const useCliente = () => {
     const provincias = ref([]);
     const distritos = ref([]);
     const entidad_financieras = ref([]);
+    const archivos = ref([]);
  
     const dato = ref({
         page: 1,
@@ -294,14 +297,59 @@ export const useCliente = () => {
         }
     }
 
+    const subirAnversoDni = async(data) => {
+        errors.value = []
+        let responded = await prestamoApi.post('api/clientes/subir-dni-anverso',data,configUploadPost);
+
+        if(responded.status === 422)
+        {
+            errors.value = jwtDecode(responded.data.errors);
+        }
+
+        if(responded.status === 200)
+        {
+            errors.value =[]
+            responded = jwtDecode(responded.data)
+            if(responded.ok==1){
+                respuesta.value=responded
+            }
+            
+        }
+    }
+    const subirReversoDni = async(data) => {
+        errors.value = [];
+        let responded = await prestamoApi.post('api/clientes/subir-dni-reverso',data,configUploadPost);
+
+        if(responded.status === 422)
+        {
+            errors.value = jwtDecode(responded.data.errors)
+
+        }
+
+        if(responded.status === 200)
+        {
+            errors.value =[];
+            responded = jwtDecode(responded.data)
+            if(responded.ok==1){
+                respuesta.value=responded
+            }
+        }
+    }
+
+    const verDocumentos = async(id) => {
+        let respond = await prestamoApi.get('api/clientes/mostrar-documentos?id='+id,config);
+        archivos.value = jwtDecode(respond.data);
+    }
+
     
     return {
         errors, respuesta, cliente, clientes, dato, form, tipoDocumentos, sexos, persona,
-        departamentos, provincias, distritos, entidad_financieras, cuenta_bancaria,
+        departamentos, provincias, distritos, entidad_financieras, cuenta_bancaria, archivos,
         listar, obtenerClientes, buscar, isActived, pagesNumber,
         cambiarPagina, cambiarPaginacion, limpiar, obtenerListaTipoDocumentos, obtenerListaSexos,
         obteneListaDepartamentos, obteneListaProvincias, obteneListaDistritos, obtenerListaEntidadFinancieras,
-        buscarDatosDni, agregarCliente, obtenerCliente, actualizarCliente
+        buscarDatosDni, agregarCliente, obtenerCliente, actualizarCliente, subirAnversoDni, subirReversoDni,
+        verDocumentos
     }
 
 }
