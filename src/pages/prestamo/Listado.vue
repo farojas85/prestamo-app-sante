@@ -106,7 +106,7 @@ const acepta = async (id) => {
     let data = new FormData();
     let presta = prestamos.value.data.find(p => p.id === id);
     data.append('id',id);
-    data.append('estado','Pendiente');
+    data.append('estado','Aceptado');
 
     await modificarEstadoPrestamo(data);
 
