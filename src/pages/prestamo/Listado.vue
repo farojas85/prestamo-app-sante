@@ -5,6 +5,7 @@ import { useDatosSession } from '../../composables/session';
 import { useHelper } from '../../helpers';
 import PrestamoFrom from './forms/PrestamoForm.vue';
 import CuotasForm from './forms/CuotaForm.vue';
+import DesembolarForm from './forms/DesembolsarForm.vue';
 
 const { usuario, roles, puede} = useDatosSession();
 
@@ -14,10 +15,11 @@ const {Swal, Toast} = useHelper();
 const cardTitle = ref('Nuevo Préstamo');
 
 const { 
-    prestamos, errors, form, dato, respuesta, prestamo,
+    prestamos, errors, form, dato, respuesta, prestamo, desembolso, cliente_cuentas,
     listar, buscar, isActived, pagesNumber, cambiarPagina, cambiarPaginacion,
     modificarEstadoPrestamo, eliminarPermanentePrestamo, obtenerPrestamo,
-    imprimirContratoPrestamo, subirContratoPrestamo, verContratoPrestamo
+    imprimirContratoPrestamo, subirContratoPrestamo, verContratoPrestamo,
+    limpiarDesembolso, obtenerListaClienteCuentas
 } = usePrestamo();
 
 onMounted(() => {
@@ -410,6 +412,18 @@ const verContrato =async(id) => {
 
 }
 
+const mdlDesembolsar = async(id) => {
+    limpiar();
+    await obtenerPrestamo(id);
+    limpiarDesembolso();
+    desembolso.value.prestamo_id = prestamo.value.id;
+    desembolso.value.cliente_id = prestamo.value.cliente_id;
+    desembolso.value.estado_crud = 'nuevo';
+    await obtenerListaClienteCuentas(desembolso.value.cliente_id);
+
+    $('#modal-desembolsar').modal('show')
+}
+
 
 </script>
 <template>
@@ -498,7 +512,7 @@ const verContrato =async(id) => {
                                                 <span class="badge badge-danger" v-else-if="presta.nombre_operacion=='Eliminado'">Eliminado</span>
                                                 <span class="badge bg-indigo" v-else-if="presta.nombre_operacion=='Observado'">Observado</span>
                                                 <span class="badge bg-maroon" v-else-if="presta.nombre_operacion=='Rechazado'">Rechazado</span>
-
+                                                <span class="badge bg-primary" v-else-if="presta.nombre_operacion=='Aceptado'">Aceptado</span>
                                             </td>
                                             <td>
                                                 <button class="btn btn-success btn-sm mr-1"
@@ -506,6 +520,12 @@ const verContrato =async(id) => {
                                                     @click.prevent="aceptarPrestamo(presta.id)"
                                                     v-if="presta.nombre_operacion=='Generado' && puede('prestamos.aceptar')">
                                                     <i class="fas fa-check"></i>
+                                                </button>
+                                                <button class="btn btn-info btn-sm mr-1"
+                                                    title="Desembolsar Préstamo"
+                                                    @click.prevent="mdlDesembolsar(presta.id)"
+                                                    v-if="puede('prestamos.desembolsar') && presta.nombre_operacion=='Aceptado'">
+                                                    <i class="fas fa-hand-holding-dollar"></i>
                                                 </button>
                                                 <button class="btn btn-warning btn-sm mr-1"
                                                     title="Editar Préstamo"
@@ -518,13 +538,7 @@ const verContrato =async(id) => {
                                                     @click.prevent="verCuotas(presta.id)"
                                                     v-if="!['Generado','Observado','Rechazado'].includes(presta.nombre_operacion) && puede('prestamos.ver-cuotas')">
                                                     <i class="fas fa-eye"></i>
-                                                </button>
-                                                <!-- <button class="btn btn-info btn-sm mr-1"
-                                                    title="Mostrar Préstamo"
-                                                    @click.prevent="mostrar(presta.id)"
-                                                    v-if="puede('prestamos.mostrar')">
-                                                    <i class="fas fa-eye"></i>
-                                                </button> -->
+                                                </button>                                                
                                                 <button class="btn bg-orange btn-sm mr-1"
                                                     title="Mostrar Observaciones Préstamo"
                                                     @click.prevent=""
@@ -598,4 +612,5 @@ const verContrato =async(id) => {
         </div>
     </div>
     <CuotasForm :form="form"></CuotasForm>
+    <DesembolarForm :desembolso="desembolso" :cliente_cuentas="cliente_cuentas"></DesembolarForm>
 </template>

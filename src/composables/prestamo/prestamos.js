@@ -15,6 +15,7 @@ export const usePrestamo = () => {
     const frecuenciaPagos = ref([]);
     const aplicacionIntereses = ref([]);
     const persona = ref({});
+    const cliente_cuentas = ref([]);
 
     // const { usuario } = useDatosSession();
 
@@ -53,6 +54,32 @@ export const usePrestamo = () => {
         estado_crud:'',
         errors:[]
     });
+
+    const desembolso = ref({
+        id:'',
+        prestamo_id:'',
+        cliente_id:'',
+        cliente_cuenta_id:'',
+        fecha_desembolso:'',
+        numero_operacion:'',
+        fecha_deposito:'',
+        imagen_voucher:'',
+        estado_crud:'',
+        errors:[]
+    })
+
+    const limpiarDesembolso = () => {
+        desembolso.value.id="";
+        desembolso.value.prestamo_id="";
+        desembolso.value.cliente_id="";
+        desembolso.value.cliente_cuenta_id="";
+        desembolso.value.fecha_desembolso="";
+        desembolso.value.numero_operacion="";
+        desembolso.value.fecha_deposito="";
+        desembolso.value.imagen_voucher="";
+        desembolso.value.estado_crud = "";
+        desembolso.value.errors = []
+    }
 
     const offest = ref(2);
 
@@ -470,16 +497,22 @@ export const usePrestamo = () => {
             window.open(url,'_blank')
         }
     }
+
+    const obtenerListaClienteCuentas = async(id) => {
+        let respond = await prestamoApi.get('/api/clientes/cuentas?cliente_id='+id,config);
+        respuesta.value =  jwtDecode(respond.data);
+        cliente_cuentas.value = jwtDecode(respond.data).cliente_cuentas;
+    }
     
     return {
         errors, respuesta, prestamos, dato, form, frecuenciaPagos, aplicacionIntereses, persona,
-        prestamo,
+        prestamo, desembolso, cliente_cuentas,
         listar, buscar, isActived, pagesNumber,
         cambiarPagina, cambiarPaginacion, obtenerValorInteres,
         obtenerListaFrecuenciaPagos, obtenerListaAplicacionInrtereses, buscarClienteExiste,
         agregrarPrestamo, modificarEstadoPrestamo, eliminarPermanentePrestamo, obtenerPrestamo,
         actualizarPrestamo, imprimirContratoPrestamo, descargarCuotas, subirContratoPrestamo,
-        verContratoPrestamo
+        verContratoPrestamo, obtenerListaClienteCuentas, limpiarDesembolso
     }
 
 }
