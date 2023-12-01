@@ -523,7 +523,7 @@ export const usePrestamo = () => {
 
             }
         }
-    }
+    }   
 
     return {
         errors, respuesta, prestamos, dato, form, frecuenciaPagos, aplicacionIntereses, persona,

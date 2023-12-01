@@ -11,6 +11,9 @@ export const useRegistroPago = () => {
     const cliente = ref({});
     const clientes = ref([]);
     const prestamos = ref([]);
+    const prestamo = ref({})
+    const cuotas = ref([]);
+    const cuota = ref({});
 
     const buscarClientesPrestamo = async(data) => {
 
@@ -41,8 +44,18 @@ export const useRegistroPago = () => {
         }
     }
 
+    const listarPrestamosCliente = async(id) => {
+        let respond = await prestamoApi.get('/api/prestamos/list-by-cliente?cliente_id='+id,config)
+        prestamos.value = jwtDecode(respond.data).prestamos
+    }
+
+    const listarCuotasPrestamo = async(id) => {
+        let respond = await prestamoApi.get('/api/cuotas/list-by-prestamo?prestamo_id='+id,config)
+        cuotas.value = jwtDecode(respond.data).cuotas
+    }
+
     return {
-        errors, respuesta, clientes,
-        buscarClientesPrestamo
+        errors, respuesta, clientes, prestamos, cliente, cuotas, prestamo, cuota,
+        buscarClientesPrestamo, listarPrestamosCliente, listarCuotasPrestamo
     }
 }
