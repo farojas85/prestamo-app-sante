@@ -20,7 +20,10 @@ const { archivos } = toRefs(props);
             <div class="modal-body" style="border-top: 1px solid; border-bottom: 1px solid;">
                 <div class="card" v-for="archivo in archivos">
                     <div class="card-header">
-                        <h3 v-text="archivo"></h3>
+                        <h3 v-if="archivo.includes('CONTRATO')"  v-text="'CONTRATO'"></h3>
+                        <h3 v-if="archivo.includes('DNI_ANVERSO')"  v-text="'DNI ANVERSO'"></h3>
+                        <h3 v-if="archivo.includes('DNI_REVERSO')"  v-text="'DNI REVERSO'"></h3>
+                        <h3 v-if="archivo.includes('VOUCHER_DESEMBOLSO')"  v-text="'VOUCHER DESEMBOLSO'"></h3>
                     </div>
                     <div class="card-body">
                         <div class="embed-responsive embed-responsive-16by9">

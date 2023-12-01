@@ -504,6 +504,27 @@ export const usePrestamo = () => {
         cliente_cuentas.value = jwtDecode(respond.data).cliente_cuentas;
     }
     
+    const agregarDesembolso = async(data) => {
+        errors.value = [];
+        respuesta.value = []
+        
+        try {
+            let respond = await prestamoApi.post('/api/desembolsos',data,configUploadPost);
+            if(respond.status === 200)
+            {
+                respond = jwtDecode(respond.data).desembolso
+                respuesta.value = respond
+            }
+            
+        } catch (error) {
+            if(error.response.status === 422)
+            {
+                errors.value = error.response.data.errors
+
+            }
+        }
+    }
+
     return {
         errors, respuesta, prestamos, dato, form, frecuenciaPagos, aplicacionIntereses, persona,
         prestamo, desembolso, cliente_cuentas,
@@ -512,7 +533,7 @@ export const usePrestamo = () => {
         obtenerListaFrecuenciaPagos, obtenerListaAplicacionInrtereses, buscarClienteExiste,
         agregrarPrestamo, modificarEstadoPrestamo, eliminarPermanentePrestamo, obtenerPrestamo,
         actualizarPrestamo, imprimirContratoPrestamo, descargarCuotas, subirContratoPrestamo,
-        verContratoPrestamo, obtenerListaClienteCuentas, limpiarDesembolso
+        verContratoPrestamo, obtenerListaClienteCuentas, limpiarDesembolso, agregarDesembolso
     }
 
 }

@@ -513,6 +513,7 @@ const mdlDesembolsar = async(id) => {
                                                 <span class="badge bg-indigo" v-else-if="presta.nombre_operacion=='Observado'">Observado</span>
                                                 <span class="badge bg-maroon" v-else-if="presta.nombre_operacion=='Rechazado'">Rechazado</span>
                                                 <span class="badge bg-primary" v-else-if="presta.nombre_operacion=='Aceptado'">Aceptado</span>
+                                                <span class="badge bg-orange" v-else-if="presta.nombre_operacion=='Abonado'">Abonado</span>
                                             </td>
                                             <td>
                                                 <button class="btn btn-success btn-sm mr-1"
@@ -612,5 +613,6 @@ const mdlDesembolsar = async(id) => {
         </div>
     </div>
     <CuotasForm :form="form"></CuotasForm>
-    <DesembolarForm :desembolso="desembolso" :cliente_cuentas="cliente_cuentas"></DesembolarForm>
+    <DesembolarForm :desembolso="desembolso" :cliente_cuentas="cliente_cuentas"
+        @onListar="listar"></DesembolarForm>
 </template>
