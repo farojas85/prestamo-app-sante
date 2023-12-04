@@ -1,11 +1,14 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRegistroPago } from '../../composables/registro-pago/registro-pago';
 
 const {
     respuesta, errors, clientes, prestamos, cliente, cuotas, prestamo,
-    buscarClientesPrestamo, listarPrestamosCliente, listarCuotasPrestamo
+    forma_pagos, detalles, registro_pago, medio_pagos,
+    buscarClientesPrestamo, listarPrestamosCliente, listarCuotasPrestamo,
+    obtenerListaFormaPagos, limpiarRegistroPago, obtenerListaMedioPagos
 } = useRegistroPago();
+
 
 const frase = ref("");
 
@@ -20,6 +23,8 @@ const busquedaCliente = async() =>{
     cuotaEncontrada.value = 0;
     cliente.value = {};
     prestamos.value = {};
+    cuotas.value = [];
+    detalles.value = [];
 
     await buscarClientesPrestamo(frase.value);
 
@@ -32,6 +37,8 @@ const busquedaCliente = async() =>{
 const buscarPrestamos= async(index,id) => {
     prestamos.value = {};
     cliente.value = {};
+    cuotas.value = [];
+    detalles.value = [];
     prestamoEncontrado.value = 0;
     cuotaEncontrada.value = 0;
 
@@ -50,12 +57,21 @@ const buscarPrestamos= async(index,id) => {
 const buscarCuotas = async(index,id) => {
     cuotas.value = [];
     prestamo.value ={};
+    detalles.value = [];
     cuotaEncontrada.value = 0;
+    forma_pagos.value = [];
+    medio_pagos.value = [];
+    limpiarRegistroPago();
+    registro_pago.value.forma_pago="";
+    registro_pago.value.medio_pago="";
 
     await listarCuotasPrestamo(id);
 
+    await obtenerListaFormaPagos();
+    
     prestamo.value = prestamos.value.data[index];
     prestamoEncontrado.value = 2;
+    registro_pago.value.prestamo_id = prestamo.value.id
 
     if(cuotas.value)
     {
@@ -64,8 +80,65 @@ const buscarCuotas = async(index,id) => {
     }
 }
 
+const listaMedioPagos = async() => {
+    medio_pagos.value = [];
+    await obtenerListaMedioPagos(registro_pago.value.forma_pago);
+
+    registro_pago.value.medio_pago='';
+    registro_pago.value.numero_operacion="";
+    registro_pago.value.fecha_deposito = "";
+    registro_pago.value.imagen_voucher = "";
+}
+
+const totalPagar = computed(() => {
+    let suma = 0;
+    detalles.value.forEach(de => {
+        suma += parseFloat(de.monto)
+    });
+    return suma
+})
+
 const agregarDetalle = async(index,id) => {
 
+    let  micuota = cuotas.value[index];
+    let cantidad = 1;
+
+    let detalle = {
+        id:micuota.id,
+        cantidad: 1,
+        fecha_vencimiento: micuota.fecha_vencimiento,
+        descripcion:micuota.descripcion,
+        monto_pagar:micuota.monto_cuota,
+        monto_pagado: micuota.monto_cuota,
+        saldo:0,
+        estado_anterior:micuota.estado
+    }
+
+    registro_pago.value.detalles.push(detalle)
+
+    cuotas.value[index].estado = 'Seleccionado';
+
+}
+
+const calcularSaldo = (index) => {
+    let detalle = registro_pago.value.detalles[index];
+    let monto_pagado = parseFloat(detalle.monto_pagado);
+    let monto_pagar =   parseFloat(detalle.monto_pagar);
+
+    if(monto_pagado > monto_pagar) {
+        $('#error_detalle_'+index).html('El Monto Pagado es mayor que el monto pagar');
+    }
+    else if(monto_pagar < 0) {
+        $('#error_detalle_'+index).html('Monto pagar no debe ser menor a cero');
+    }
+
+    else {
+        $('#error_detalle_'+index).html('');
+        let saldo = monto_pagar - monto_pagado;
+    
+        registro_pago.value.saldo = saldo;
+    }
+    
 }
 </script>
 <template>
@@ -300,7 +373,8 @@ const agregarDetalle = async(index,id) => {
                                     <tr v-if="cuotas?.length== 0">
                                         <td class="text-center text-danger table-danger" colspan="6">--Datos no encontrados--</td>
                                     </tr>
-                                    <tr v-else v-for="(cuota,index) in cuotas">
+                                    <tr v-else v-for="(cuota,index) in cuotas"
+                                        :class="{'table-danger': ['Anulado','Eliminado','Seleccionado'].includes(cuota.estado) }">
                                         <td class="text-center" v-text="index+1"></td>
                                         <td class="text-center" v-text="cuota.fecha_vencimiento"></td>
                                         <td class="text-center" v-text="cuota.descripcion"></td>
@@ -310,9 +384,117 @@ const agregarDetalle = async(index,id) => {
                                             <span class="badge badge-success" v-else-if="cuota.estado=='Pagado'">Pagado</span>
                                         </td>
                                         <td>
-                                            <button type="button" class="btn btn-sm btn-success" @click="buscarCuotas(index,cuota.id)">
+                                            <button type="button" class="btn btn-sm btn-success" @click="agregarDetalle(index,cuota.id)"
+                                                v-if="['Pendiente'].includes(cuota.estado)">
                                                 <i class="fas fa-plus"></i>
                                             </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" v-if="registro_pago.detalles.length>0">
+        <div class="col-md-12">
+            <div class="card border border-success">
+                <div class="card-header py-2 bg-success">
+                    <h5 class="card-title">Registro de Pagos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text font-weight-bold">Forma Pago</span>
+                                </div>
+                                <select class="form-control form-control-sm"
+                                    v-model="registro_pago.forma_pago" id="forma_pago"
+                                    :class="{ 'is-invalid' : registro_pago.errors.forma_pago}"
+                                    @change="listaMedioPagos">
+                                    <option value="">-Seleccionar-</option>
+                                    <option v-for="forma in forma_pagos" :value="forma.id" >{{ forma.nombre }}</option>
+                                </select>
+                            </div>
+                            <small class="text-danger" v-for="error in registro_pago.errors.forma_pago" :key="error">{{error }}</small>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text font-weight-bold">Medio Pago</span>
+                                </div>
+                                <select class="form-control form-control-sm"
+                                    v-model="registro_pago.medio_pago" id="medio_pago"
+                                    :class="{ 'is-invalid' : registro_pago.errors.medio_pago}">
+                                    <option value="">-Seleccionar-</option>
+                                    <option v-for="medio in medio_pagos" :value="medio.id" >{{ medio.nombre }}</option>
+                                </select>
+                            </div>
+                            <small class="text-danger" v-for="error in registro_pago.errors.medio_pago" :key="error">{{error }}</small>
+                        </div>
+                    </div>
+                    <div class="row" v-if="[2,3].includes(registro_pago.forma_pago)">
+                        <div class="col-md-3 mb-2">
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text font-weight-bold">Número Operación</span>
+                                </div>
+                                <input type ="text" class="form-control" v-model="registro_pago.numero_operacion" 
+                                    :class="{ 'is-invalid' : registro_pago.errors.numero_operacion }"/>                        
+                            </div>
+                            <small class="text-danger" v-for="error in registro_pago.errors.numero_operacion" :key="error">{{error }}</small>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text font-weight-bold">Fecha Depósito</span>
+                                </div>
+                                <input type ="date" class="form-control" v-model="registro_pago.fecha_deposito" 
+                                    :class="{ 'is-invalid' : registro_pago.errors.fecha_deposito }"/> 
+                            </div>
+                            <small class="text-danger" v-for="error in registro_pago.errors.fecha_deposito" :key="error">{{error }}</small>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text font-weight-bold">Voucher</span>
+                                </div>
+                                <input type="file" class="form-control" id="imagen_voucher"
+                                    :class="{ 'is-invalid' : registro_pago.errors.imagen_voucher }"/> 
+                            </div>
+                            <small class="text-danger" v-for="error in registro_pago.errors.imagen_voucher" :key="error">{{error }}</small>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 table-responsive mb-2">
+                            <table class="table table-sm table-bordered">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th class="text-center">#</th>
+                                        <th class="text-center">Fecha Vencimiento</th>
+                                        <th class="text-center">Descripción</th>
+                                        <th class="text-center">Monto Pagar</th>
+                                        <th class="text-center">Monto Pagado</th>
+                                        <th class="text-center">Saldo</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(detal,index) in registro_pago.detalles">
+                                        <td class="text-center" v-text="index+1"></td>
+                                        <td class="text-center" v-text="detal.fecha_vencimiento"></td>
+                                        <td class="text-center" v-text="detal.descripcion"></td>
+                                        <td class="text-center" v-text="detal.monto_pagar"></td>
+                                        <td class="text-center">
+                                            <input type="text" v-model="detal.monto_pagado" @change="calcularSaldo(index)" />
+                                            <small class="text-danger" :id="'error_detalle_'+(index)" ></small>
+                                        </td>
+                                        <td v-text="detal.saldo"></td>
+                                        <td>
+                                        
                                         </td>
                                     </tr>
                                 </tbody>

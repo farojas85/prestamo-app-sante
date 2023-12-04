@@ -54,7 +54,6 @@ const crud = {
 
         await agregarDesembolso(desembolso.value);
 
-
         if(errors.value){
             desembolso.value.errors = errors.value;
         } 
@@ -65,7 +64,7 @@ const crud = {
             desembolso.value.estado_crud =''
             emit('onListar')
         }
-        if(respuesta.value.ok!=1)
+        if(respuesta.value.ok!=1 )
         {
             Swal.fire({
                 text:respuesta.value.mensaje,
