@@ -400,13 +400,24 @@ export const usePrestamo = () => {
     const descargarCuotas = (cuota) => {
         
         let apellidos_nombres = (cuota.apellido_paterno+' '+cuota.apellido_materno+' '+cuota.nombres) ?? "";
+        let dni = cuota.numero_documento ?? "";
+        let telefono = cuota.telefono ?? "";
+        let direccion = cuota.direccion ?? "";
+
         const doc = new jsPDF({ orientation: "p", unit: "mm", format: "A4" });
         
+        doc.addImage('/img/logos/logo-1.png','PNG',5,5,50,15);
+
         doc.setFontSize(14).setFont("times",'normal')
-        doc.text('PRÉSTAMOS - CUOTAS',105,30,'center');
+        doc.text('PRÉSTAMOS - CUOTAS',105,25,'center');
 
         doc.setFontSize(18).setFont("times",'bold')
-        doc.text(apellidos_nombres,105,40,'center')
+        doc.text(apellidos_nombres,105,36,'center')
+        doc.setFontSize(16).setFont("times",'normal')
+        doc.text(direccion,105,42,'center')
+        doc.setFontSize(16).setFont("times",'normal')
+        doc.text(telefono,105,48,'center')
+
         doc.setDrawColor(0);
         doc.setLineWidth(0.2);
         doc.setFillColor(0, 0, 255)
@@ -430,7 +441,7 @@ export const usePrestamo = () => {
         doc.setFontSize(12).setFont("times",'bold')
         doc.text('Número de Cuotas',165,58,'center');
         doc.setFontSize(18).setFont("times",'normal')
-        doc.text(cuota.numero_cuotas+' %',165,65,'center');
+        doc.text(""+cuota.numero_cuotas,165,65,'center');
         //-------------------------------------------------------------
 
         doc.setFontSize(16).setFont("times",'bold')

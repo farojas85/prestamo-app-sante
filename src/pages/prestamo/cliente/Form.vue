@@ -2,6 +2,7 @@
 import { toRefs, onMounted, ref } from 'vue';
 import { useHelper } from '../../../helpers';
 import { useCliente } from '../../../composables/prestamo/clientes';
+import { useDatosSession } from '../../../composables/session';
 
 const props = defineProps({
     form: Object
@@ -13,6 +14,8 @@ const { Toast, soloNumeros } = useHelper();
 
 const { form} = toRefs(props);
 
+const { roles, usuario } = useDatosSession();
+
 const buscandoCliente = ref(false);
 
 const buscarPersona = ref({
@@ -23,10 +26,11 @@ const buscarPersona = ref({
 const {
     errors, respuesta, tipoDocumentos, sexos, persona,
     departamentos, provincias, distritos, entidad_financieras, 
-    cuenta_bancaria,
+    cuenta_bancaria, empleados,
     obtenerListaTipoDocumentos, obtenerListaSexos,limpiar,
     obteneListaDepartamentos, obteneListaProvincias, obteneListaDistritos,
-    obtenerListaEntidadFinancieras, buscarDatosDni, agregarCliente, actualizarCliente
+    obtenerListaEntidadFinancieras, buscarDatosDni, agregarCliente, actualizarCliente,
+    obtenerListaEmpleados
 } = useCliente();
 
 onMounted(() => {
@@ -34,7 +38,17 @@ onMounted(() => {
     obtenerListaTipoDocumentos();
     obtenerListaSexos();
     obtenerListaEntidadFinancieras();
+    listarEmpleados();
 });
+
+
+const listarEmpleados = async() => {
+    let role = (roles.value.slug);
+    let user_id = usuario.value.id;
+    let dato = { role : role, user_id : user_id }
+
+    await  obtenerListaEmpleados(dato);
+}
 
 const obtenerPersona = async() => {
 
@@ -238,6 +252,19 @@ const guardar = () => {
                                                 :class="{ 'is-invalid' : form.errors.telefono}" placeholder="Ingrese teléfono"
                                                 >
                                             <small class="text-danger" v-for="error in form.errors.telefono" :key="error">{{error }}</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row" v-if="['super-usuario','gerente','lider-superior'].includes(roles.slug)">
+                                        <label for="sexo" class="col-form-label col-form-label-sm col-md-3 mb-1">Lider:</label>
+                                        <div class="col-md-9 mb-1">
+                                            <select class="form-control form-control-sm"
+                                                v-model="form.sexo_id" id="sexo"
+                                                :class="{ 'is-invalid' : form.errors.empleado_id}">
+                                                <option value="">-Seleccionar-</option>
+                                                <option v-for="emp in empleados" :value="emp.id" >{{ emp.empleado }}</option>
+                                            </select>
+                                            <small class="text-danger" v-for="error in form.errors.empleado_id" :key="error">{{error }}</small>
                                         </div>
                                     </div>
                                 </div>

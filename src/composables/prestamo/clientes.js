@@ -2,7 +2,6 @@ import { ref } from "vue";
 import { jwtDecode } from 'jwt-decode';
 import { prestamoApi } from "../../api";
 import { getConfigHeader, getdataParamsPagination, getConfigHeaderPost,getConfigHeaderUpload } from "../../helpers";
-import axios from "axios";
 
 export const useCliente = () => {
     const errors = ref([]);
@@ -20,6 +19,7 @@ export const useCliente = () => {
     const distritos = ref([]);
     const entidad_financieras = ref([]);
     const archivos = ref([]);
+    const empleados = ref([]);
  
     const dato = ref({
         page: 1,
@@ -47,6 +47,7 @@ export const useCliente = () => {
         distritos:[],
         cuentas_bancarias:[],
         es_activo:1,
+        empleado_id:'',
         estado_crud:'',
         errors:[]
     });
@@ -70,6 +71,7 @@ export const useCliente = () => {
         form.value.distritos=[];
         form.value.cuentas_bancarias=[];
         form.value.es_activo=1;
+        form.value.empleado_id="";
         form.value.estado_crud='';
         form.value.errors = [];
         errors.value = [];
@@ -341,15 +343,22 @@ export const useCliente = () => {
         archivos.value = jwtDecode(respond.data);
     }
 
+    const obtenerListaEmpleados = async(data) => {
+
+        let respond = await prestamoApi.get('/api/empleados/list-for-clientes?role='+data.role+'&user_id'+data.user_id,config);
+
+        empleados.value = jwtDecode(respond.data).empleados
+    }
     
     return {
         errors, respuesta, cliente, clientes, dato, form, tipoDocumentos, sexos, persona,
         departamentos, provincias, distritos, entidad_financieras, cuenta_bancaria, archivos,
+        empleados,
         listar, obtenerClientes, buscar, isActived, pagesNumber,
         cambiarPagina, cambiarPaginacion, limpiar, obtenerListaTipoDocumentos, obtenerListaSexos,
         obteneListaDepartamentos, obteneListaProvincias, obteneListaDistritos, obtenerListaEntidadFinancieras,
         buscarDatosDni, agregarCliente, obtenerCliente, actualizarCliente, subirAnversoDni, subirReversoDni,
-        verDocumentos
+        verDocumentos, obtenerListaEmpleados
     }
 
 }
