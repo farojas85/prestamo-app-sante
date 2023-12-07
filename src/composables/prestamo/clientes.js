@@ -48,6 +48,8 @@ export const useCliente = () => {
         cuentas_bancarias:[],
         es_activo:1,
         empleado_id:'',
+        user_id:'',
+        role:'',
         estado_crud:'',
         errors:[]
     });
@@ -70,8 +72,10 @@ export const useCliente = () => {
         form.value.provincias=[];
         form.value.distritos=[];
         form.value.cuentas_bancarias=[];
-        form.value.es_activo=1;
         form.value.empleado_id="";
+        form.value.user_id = '';
+        form.value.role = "";
+        form.value.es_activo=1;
         form.value.estado_crud='';
         form.value.errors = [];
         errors.value = [];

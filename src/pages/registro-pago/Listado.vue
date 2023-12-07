@@ -1,20 +1,28 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRegistroPago } from '../../composables/registro-pago/registro-pago';
+import { useDatosSession } from '../../composables/session';
+import { useHelper } from '../../helpers';
 
 const {
     respuesta, errors, clientes, prestamos, cliente, cuotas, prestamo,
     forma_pagos, detalles, registro_pago, medio_pagos,
     buscarClientesPrestamo, listarPrestamosCliente, listarCuotasPrestamo,
-    obtenerListaFormaPagos, limpiarRegistroPago, obtenerListaMedioPagos
+    obtenerListaFormaPagos, limpiarRegistroPago, obtenerListaMedioPagos,
+    agregrarRegistroPago
 } = useRegistroPago();
 
+const {usuario } = useDatosSession();
+
+const { Toast } = useHelper();
 
 const frase = ref("");
 
 const clienteEncontrado = ref(0);
 const prestamoEncontrado = ref(0);
 const cuotaEncontrada = ref(0);
+
+const indexPrestamo =ref("");
 
 const busquedaCliente = async() =>{
 
@@ -54,6 +62,28 @@ const buscarPrestamos= async(index,id) => {
     }
 }
 
+const buscaCuotaRegistro = async(id) => {
+    cuotas.value = [];
+    detalles.value = [];
+    cuotaEncontrada.value = 0;
+    forma_pagos.value = [];
+    medio_pagos.value = [];
+    limpiarRegistroPago();
+    registro_pago.value.forma_pago="";
+    registro_pago.value.medio_pago="";
+
+    await listarCuotasPrestamo(id);
+
+    await obtenerListaFormaPagos();
+    
+    registro_pago.value.prestamo_id = prestamo.value.id
+
+    if(cuotas.value)
+    {
+        cuotaEncontrada.value = 1;
+    }
+}
+
 const buscarCuotas = async(index,id) => {
     cuotas.value = [];
     prestamo.value ={};
@@ -90,13 +120,7 @@ const listaMedioPagos = async() => {
     registro_pago.value.imagen_voucher = "";
 }
 
-const totalPagar = computed(() => {
-    let suma = 0;
-    detalles.value.forEach(de => {
-        suma += parseFloat(de.monto)
-    });
-    return suma
-})
+
 
 const agregarDetalle = async(index,id) => {
 
@@ -120,6 +144,14 @@ const agregarDetalle = async(index,id) => {
 
 }
 
+const totalPagar = computed(() => {
+    let suma = 0;
+    registro_pago.value.detalles.forEach(de => {
+        suma += parseFloat(de.monto_pagado)
+    });
+    return suma
+})
+
 const calcularSaldo = (index) => {
     let detalle = registro_pago.value.detalles[index];
     let monto_pagado = parseFloat(detalle.monto_pagado);
@@ -140,6 +172,35 @@ const calcularSaldo = (index) => {
     }
     
 }
+
+const validarImage = () => {
+    registro_pago.value.imagen_voucher = $('#imagen_voucher')[0].files[0];
+}
+
+const guardar = async() => {
+
+    registro_pago.value.total = totalPagar.value;
+    registro_pago.value.user_id = usuario.value.id;
+
+    await agregrarRegistroPago(registro_pago.value);
+
+    if(errors.value)
+    {
+        registro_pago.value.errors = errors.value
+    }
+
+    if(respuesta.value)
+    {
+        if(respuesta.value.ok==1)
+        {
+            Toast.fire({icon:'success', title:respuesta.value.mensaje})
+
+            buscaCuotaRegistro(prestamo.value.id)
+        }
+    }
+}
+
+
 </script>
 <template>
     <div class="row">
@@ -457,13 +518,13 @@ const calcularSaldo = (index) => {
                             </div>
                             <small class="text-danger" v-for="error in registro_pago.errors.fecha_deposito" :key="error">{{error }}</small>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-6">
                             <div class="input-group input-group-sm">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text font-weight-bold">Voucher</span>
                                 </div>
                                 <input type="file" class="form-control" id="imagen_voucher"
-                                    :class="{ 'is-invalid' : registro_pago.errors.imagen_voucher }"/> 
+                                    :class="{ 'is-invalid' : registro_pago.errors.imagen_voucher }" @change="validarImage" /> 
                             </div>
                             <small class="text-danger" v-for="error in registro_pago.errors.imagen_voucher" :key="error">{{error }}</small>
                         </div>
@@ -494,13 +555,39 @@ const calcularSaldo = (index) => {
                                         </td>
                                         <td v-text="detal.saldo"></td>
                                         <td>
-                                        
+                                            <button type="button" class="btn btn-danger btn-xs" disabled>
+                                                <i class="fas fa-times"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th class="text-right">TOTAL</th>
+                                        <th class="font-weight-bold text-center" style="font-size: 1.5rem;">S/ {{ parseFloat(totalPagar).toFixed(2) }}</th>
+                                    </tr>
+                                </tfoot>
                             </table>
+                            <small class="text-danger" v-for="error in registro_pago.errors.detalles" :key="error">{{error }}</small>
                         </div>
                     </div>
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            <button type="submit" class="btn btn-danger mr-3" @click.prevent="cancelar">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-success" @click.prevent="guardar">
+                                <i class="fas fa-save"></i> Guardar
+                                <!-- <span v-if="form.estado_crud=='nuevo'"><i class="fas fa-save"></i> Guardar</span> -->
+                                <!-- <span v-else-if="form.estado_crud=='editar'"><i class="fas fa-sync-alt"></i> Actualizar</span> -->
+                            </button>
+                        </div>
+                    </div>  
                 </div>
             </div>
         </div>

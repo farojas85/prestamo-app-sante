@@ -125,6 +125,9 @@ const crud = {
     'nuevo': async() => {
 
         form.value.errors = [];
+        form.value.user_id = usuario.value.id;
+        form.value.role = roles.value.slug;
+        
         await agregarCliente(form.value);
 
         if(errors.value) form.value.errors = errors.value;
@@ -140,6 +143,8 @@ const crud = {
     'editar': async() => {
         
         form.value.errors = [];
+        form.value.user_id = usuario.value.id;
+        form.value.role = roles.value.slug;
         await actualizarCliente(form.value);
 
         if(errors.value) form.value.errors = errors.value;
@@ -256,10 +261,10 @@ const guardar = () => {
                                     </div>
 
                                     <div class="form-group row" v-if="['super-usuario','gerente','lider-superior'].includes(roles.slug)">
-                                        <label for="sexo" class="col-form-label col-form-label-sm col-md-3 mb-1">Lider:</label>
+                                        <label for="empleado" class="col-form-label col-form-label-sm col-md-3 mb-1">Lider:</label>
                                         <div class="col-md-9 mb-1">
                                             <select class="form-control form-control-sm"
-                                                v-model="form.sexo_id" id="sexo"
+                                                v-model="form.empleado_id" id="empleado"
                                                 :class="{ 'is-invalid' : form.errors.empleado_id}">
                                                 <option value="">-Seleccionar-</option>
                                                 <option v-for="emp in empleados" :value="emp.id" >{{ emp.empleado }}</option>

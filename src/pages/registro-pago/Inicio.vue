@@ -4,6 +4,7 @@ import { defineTitle } from '../../helpers';
 import { useDatosSession } from '../../composables/session';
 import ContentHeader from '../../components/ContentHeader.vue';
 import RegistroPagoNuevoForm from './Listado.vue';
+import HistorialPagoForm from './HistorialPago.vue';
 
 const { usuario, puede } = useDatosSession();
 
@@ -42,9 +43,15 @@ const cambiarVista =(nuevaVista, icono) => {
                                 v-if="puede('registro-pagos.nuevo')">
                                 <i class="fas fa-hand-holding-dollar"></i> Registrar Pago
                             </button>
+                            <button class="btn btn-app bg-primary"
+                                @click.prevent="cambiarVista('Historial Pago','fas fa-file-invoice-dollar')"
+                                v-if="puede('registro-pagos.nuevo')">
+                                <i class="fas fa-file-invoice-dollar"></i> Historial Pago
+                            </button>
                         </div>
                         <div class="card-body">
-                            <RegistroPagoNuevoForm></RegistroPagoNuevoForm>
+                            <RegistroPagoNuevoForm v-if="titleHeader.titulo=='Registro Pago'"></RegistroPagoNuevoForm>
+                            <HistorialPagoForm v-else-if="titleHeader.titulo=='Historial Pago'"></HistorialPagoForm>
                         </div>
                     </div>
                 </div>

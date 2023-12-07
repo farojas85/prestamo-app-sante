@@ -195,6 +195,7 @@ const mostrarDocumentos = async(id) => {
                                     <th class="text-center">Nro. Documento</th>
                                     <th class="text-center">Apellidos y Nombres</th>
                                     <th class="text-center">Tel&eacute;fono</th>
+                                    <th class="text-center">Lider</th>
                                     <th class="text-center">valoración</th>
                                     <th class="text-center">Acciones</th>
                                 </tr>
@@ -210,6 +211,7 @@ const mostrarDocumentos = async(id) => {
                                     <td class="text-center" v-text="cli.numero_documento"></td>
                                     <td class="text-left" v-text="cli.apellidos_nombres"></td>
                                     <td class="text-center" v-text="cli.telefono"></td>
+                                    <td v-text="cli.lider"></td>
                                     <td></td>
                                     <td>
                                         <template v-if="cli.es_activo==1">

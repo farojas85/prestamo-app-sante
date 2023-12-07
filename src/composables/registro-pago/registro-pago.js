@@ -1,13 +1,14 @@
 import { ref } from "vue";
 import { jwtDecode } from 'jwt-decode';
 import { prestamoApi } from "../../api";
-import { getConfigHeader, getdataParamsPagination, getConfigHeaderPost } from "../../helpers";
+import { getConfigHeader, getdataParamsPagination, getConfigHeaderPost, getConfigHeaderUpload } from "../../helpers";
 
 export const useRegistroPago = () => {
     const errors = ref([]);
     const respuesta = ref([]);
     const config = getConfigHeader();
     const configPost = getConfigHeaderPost();
+    const configPostUpload = getConfigHeaderUpload();
     const cliente = ref({});
     const clientes = ref([]);
     const prestamos = ref([]);
@@ -107,10 +108,52 @@ export const useRegistroPago = () => {
         medio_pagos.value = jwtDecode(respond.data).medio_pagos
     }
 
+    const agregrarRegistroPago = async( data ) =>{
+        errors.value = [];
+
+        try {
+            let datos = new FormData();
+
+            datos.append('prestamo_id',data.prestamo_id)
+            datos.append('forma_pago',data.forma_pago);
+            datos.append('medio_pago',data.medio_pago);
+            datos.append('numero_operacion',data.numero_operacion);
+            datos.append('fecha_deposito',data.fecha_deposito);
+            datos.append('imagen_voucher',data.imagen_voucher);
+            datos.append('total',data.total)
+            datos.append('user_id',data.user_id);
+            datos.append('detalles',JSON.stringify(data.detalles))
+
+            let respond = await prestamoApi.post('/api/registro-pagos',datos,configPostUpload);
+
+            if(respond.status === 200)
+            {
+                respond = jwtDecode(respond.data)
+                if(respond.ok==1)
+                {
+                   respuesta.value = respond
+                }
+            }
+
+        } catch (error) {
+    
+            errors.value = [];
+            if(error.response.status) 
+            {
+                if(error.response.status === 422)
+                {
+                    errors.value = error.response.data
+                }
+            }
+        }
+
+    }
+
     return {
         errors, respuesta, clientes, prestamos, cliente, cuotas, prestamo, cuota,
         forma_pagos, detalles, registro_pago, medio_pagos,
         buscarClientesPrestamo, listarPrestamosCliente, listarCuotasPrestamo,
-        obtenerListaFormaPagos, limpiarRegistroPago, obtenerListaMedioPagos
+        obtenerListaFormaPagos, limpiarRegistroPago, obtenerListaMedioPagos,
+        agregrarRegistroPago
     }
 }
