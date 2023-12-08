@@ -1,13 +1,20 @@
 import { ref,inject } from 'vue';
 import { jwtDecode } from 'jwt-decode';
-import { getConfigHeader } from '../helpers'
+import { getConfigHeader, getConfigHeaderPost } from '../helpers'
 import { prestamoApi } from '../api';
 
 export const useAutenticacion = () => {
     const config = getConfigHeader();
+    const configPost = getConfigHeaderPost();
     const errors = ref([]);
     const respuesta = ref([]);
     const usuario = ref({ name: '', password: '' });
+
+    const dato = ref({
+        user_id: '',
+        password:'',
+        password_confirmation:''
+    })
 
     const loginUsuario = async() => {
 
@@ -39,8 +46,31 @@ export const useAutenticacion = () => {
         }
     }
 
+    const cambiarClaveForzado = async (dato) => {
+        errors.value = [];
+        try {
+            let respond = await prestamoApi.post('/api/users/forzar-cambio-clave',dato,configPost);
+            
+            if(respond.status == 200) {
+                let user = jwtDecode(respond.data)
+                if(user.ok==1)
+                {
+                    logoutUsuario(dato.user_id);
+                }
+            }
+        }
+        catch (error) {
+            if(error.response.status === 422)
+            {
+                let datos = jwtDecode(error.response.data);
+                errors.value = datos
+            }
+        }
+
+    }
+
     return {
-        errors, usuario, respuesta,
-        loginUsuario, logoutUsuario
+        errors, usuario, respuesta, dato,
+        loginUsuario, logoutUsuario, cambiarClaveForzado
     }
 }

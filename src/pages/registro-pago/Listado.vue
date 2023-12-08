@@ -126,14 +126,18 @@ const agregarDetalle = async(index,id) => {
 
     let  micuota = cuotas.value[index];
     let cantidad = 1;
-
+    let monto_pagado = micuota.monto_cuota;
+    if(micuota.saldo > 0)
+    {
+        monto_pagado = micuota.saldo
+    }
     let detalle = {
         id:micuota.id,
         cantidad: 1,
         fecha_vencimiento: micuota.fecha_vencimiento,
         descripcion:micuota.descripcion,
         monto_pagar:micuota.monto_cuota,
-        monto_pagado: micuota.monto_cuota,
+        monto_pagado: monto_pagado,
         saldo:0,
         estado_anterior:micuota.estado
     }
@@ -163,12 +167,11 @@ const calcularSaldo = (index) => {
     else if(monto_pagar < 0) {
         $('#error_detalle_'+index).html('Monto pagar no debe ser menor a cero');
     }
-
     else {
         $('#error_detalle_'+index).html('');
         let saldo = monto_pagar - monto_pagado;
     
-        registro_pago.value.saldo = saldo;
+        registro_pago.value.detalles[index].saldo = saldo;
     }
     
 }
@@ -413,6 +416,7 @@ const guardar = async() => {
                                     <span class="badge bg-maroon" v-else-if="prestamo.estado=='Rechazado'">Rechazado</span>
                                     <span class="badge bg-primary" v-else-if="prestamo.estado=='Aceptado'">Aceptado</span>
                                     <span class="badge bg-orange" v-else-if="prestamo.estado=='Abonado'">Abonado</span>
+                                    
                                 </label>
                             </div>
                         </div>
@@ -425,7 +429,8 @@ const guardar = async() => {
                                         <th class="text-center">#</th>
                                         <th class="text-center">Fecha Vencimiento</th>
                                         <th class="text-center">Descripción</th>
-                                        <th class="text-center">Monto</th>
+                                        <th class="text-center">Monto Pagar</th>
+                                        <th class="text-center">Saldo</th>
                                         <th class="text-center">Estado</th>
                                         <th></th>
                                     </tr>
@@ -441,8 +446,22 @@ const guardar = async() => {
                                         <td class="text-center" v-text="cuota.descripcion"></td>
                                         <td class="text-center" v-text="cuota.monto_cuota"></td>
                                         <td class="text-center">
+                                            <template v-if="cuota.monto_pagado > 0"  >
+                                                <span class="text-danger" v-if="parseFloat(cuota.monto_cuota - cuota.monto_pagado) > 0">
+                                                    {{ parseFloat(cuota.monto_cuota - cuota.monto_pagado).toFixed(2)}}
+                                                </span>
+                                                <span v-else>
+                                                    {{ parseFloat(cuota.monto_cuota - cuota.monto_pagado).toFixed(2)}}
+                                                </span>
+                                            </template>                                    
+                                            <template v-else >
+                                                {{ parseFloat(cuota.monto_cuota).toFixed(2)  }}
+                                            </template>
+                                        </td>
+                                        <td class="text-center"> 
                                             <span class="badge badge-warning" v-if="cuota.estado=='Pendiente'">Pendiente</span>
                                             <span class="badge badge-success" v-else-if="cuota.estado=='Pagado'">Pagado</span>
+                                            <span class="badge bg-orange" v-else-if="cuota.estado=='Pre-Pagado'">Pre-Pagado</span>
                                         </td>
                                         <td>
                                             <button type="button" class="btn btn-sm btn-success" @click="agregarDetalle(index,cuota.id)"

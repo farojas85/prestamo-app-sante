@@ -2,6 +2,7 @@ import { ref } from "vue";
 import { jwtDecode } from 'jwt-decode';
 import { prestamoApi } from "../../api";
 import { getConfigHeader, getdataParamsPagination, getConfigHeaderPost, getConfigHeaderUpload } from "../../helpers";
+import { jsPDF } from "jspdf";
 
 export const useRegistroPago = () => {
     const errors = ref([]);
@@ -18,6 +19,8 @@ export const useRegistroPago = () => {
     const detalles = ref([]);
     const forma_pagos = ref([]);
     const medio_pagos = ref([]);
+    const registro_pagos = ref([]);
+    const vouchers = ref([]);
     
     
     const registro_pago = ref({
@@ -149,11 +152,122 @@ export const useRegistroPago = () => {
 
     }
 
+    const obtenerHistorialPagos = async(data) =>{
+        let datos = "page="+data.pagina+"&paginacion="+data.paginacion+
+                    "&user="+data.user+'&role='+data.role;
+
+        let respond = await prestamoApi.get('/api/registro-pagos/all-pagination?'+datos, config)
+
+        registro_pagos.value = jwtDecode(respond.data).registro_pagos
+    }
+
+    const obtenerDataRegistroPago = async(id) => {  
+        let respond = await prestamoApi.get('/api/registro-pagos/data?id='+id,config)
+
+        let datos =  jwtDecode(respond.data);
+
+        registro_pago.value = datos.registro_pago;
+        vouchers.value = datos.vouchers;
+    }
+
+    const aceptarRegistroPago = async(data) =>{
+        errors.value = [];
+        respuesta.value = []       
+        
+        let respond = await prestamoApi.post('/api/registro-pagos/aceptar-pago',data,configPost);
+
+
+        if(respond.status == 422)
+        {
+            errors.value = respond.data.errors
+        }
+        
+        if(respond.status = 200)
+        {
+            respond = jwtDecode(respond.data)
+            if(respond.ok==1)
+            {
+                respuesta.value = respond
+            }
+        }
+
+    }
+
+    const imprimirReciboPago = (pago) => {
+        const doc = new jsPDF({ orientation: "p", unit: "mm",  format: [200, 80] });
+        const pageWidth = doc.internal.pageSize.getWidth();
+        
+        doc.addFont('/fonts/arial-black-normal.ttf','Arial Black','normal')
+
+
+        doc.addImage('/img/logos/logo-1.png','PNG',10,5,50,15);
+
+        doc.setLineDash([1, 0.8], 0).line(5, 22, 75, 22);
+
+        //RECIBO DE PAGO
+        doc.setFontSize(12).setFont("times",'normal')
+        doc.text('Recibo de Pago de cuotas',40,26,'center');
+
+        doc.setFontSize(16).setFont("Arial Black",'normal')
+        doc.text(''+pago.serie_numero,40,32,'center');
+
+        doc.setFontSize(12).setFont("Arial Black",'normal')
+        doc.text(''+pago.fecha,40,37,'center');
+
+        doc.setLineDash([1, 0.8], 0).line(5, 40, 75, 40);
+        //--------------------------------------------------------
+
+        //CLIENTE
+        doc.setFontSize(9).setFont("times",'normal')
+        doc.text('Cliente: ',6,44,'left');
+        doc.setFontSize(9).setFont("times",'normal')
+        doc.text(pago.cliente.substring(0,33),16,44,'left');
+
+        doc.setFontSize(9).setFont("times",'normal')
+        doc.text('Lider: ',6,48,'left');
+        doc.setFontSize(9).setFont("times",'normal')
+        doc.text(pago.lider.substring(0,33),16,48,'left');
+
+        doc.setLineDash([1, 0.8], 0).line(5, 50, 75, 50 );
+        //--------------------------------------------------------
+
+        //DETALLE DE PAGOS
+        doc.setFontSize(9).setFont("times",'bold')
+        doc.text('Detalle',6,55,'left');
+        doc.setFontSize(9).setFont("times",'bold')
+        doc.text('Monto',55,55,'left');
+
+        doc.setFontSize(9).setFont("times",'normal')
+        doc.text(''+pago.cuota,6,59,'left');
+
+        doc.setFontSize(9).setFont("times",'normal')
+        doc.text(''+parseFloat(pago.total).toFixed(2),55,59,'left');
+        
+        doc.setLineDash([1, 0.8], 0).line(5, 61, 75, 61 );
+        //-------------------------------------------------------------
+        //TOTAL PAGO
+        doc.setFontSize(9).setFont("times",'bold')
+        doc.text('TOTAL:',6,65,'left');
+
+        doc.setFontSize(9).setFont("times",'bold')
+        doc.text('S/ '+parseFloat(pago.total).toFixed(2),51.5,65,'left');
+
+        doc.setLineDash([1, 0.8], 0).line(5, 67, 75, 67 );
+
+        doc.setFontSize(9).setFont("times",'bold')
+        doc.text('Cuota:',55,71,'left');
+        doc.setFontSize(9).setFont("times",'normal')
+        doc.text(''+pago.numero_cuota+" / "+pago.numero_cuotas,64.5,71,'left');
+
+        doc.save('recibo-pago.pdf');
+    }
+
     return {
         errors, respuesta, clientes, prestamos, cliente, cuotas, prestamo, cuota,
-        forma_pagos, detalles, registro_pago, medio_pagos,
+        forma_pagos, detalles, registro_pago, medio_pagos,registro_pagos, vouchers,
         buscarClientesPrestamo, listarPrestamosCliente, listarCuotasPrestamo,
         obtenerListaFormaPagos, limpiarRegistroPago, obtenerListaMedioPagos,
-        agregrarRegistroPago
+        agregrarRegistroPago,obtenerHistorialPagos, obtenerDataRegistroPago,
+        aceptarRegistroPago, imprimirReciboPago
     }
 }
