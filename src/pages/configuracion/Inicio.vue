@@ -7,6 +7,7 @@ import FrecuenciaPagoView from './frecuencia-pago/Inicio.vue';
 import AplicacionInteresView from './aplicacion-interes/Inicio.vue';
 import AplicacionMoraView from './aplicacion-mora/Inicio.vue';
 import MonedaView from './moneda/Inicio.vue';
+import NotificacionView from './notificacion/Inicio.vue';
 
 const { usuario, puede } = useDatosSession();
 
@@ -61,12 +62,12 @@ const cambiarVista =(nuevaVista, icono) => {
                                 v-if="puede('monedas.inicio')" >
                                 <i class="fas fa-coins"></i> Monedas
                             </button>
-                            <!--<button class="btn btn-app bg-primary"
-                                @click.prevent="cambiarVista('Menús - Roles','fas fa-user-minus')"
-                                v-if="puede('menu-role.inicio')" >
-                                <i class="fas fa-user-minus"></i> Men&uacute;s / Roles
-                            </button>s
                             <button class="btn btn-app bg-primary"
+                                @click.prevent="cambiarVista('Notificaciones','fas fa-comment')"
+                                v-if="puede('notificaciones.inicio')" >
+                                <i class="fas fa-comment"></i>Notificaciones
+                            </button>
+                            <!--<button class="btn btn-app bg-primary"
                                 @click.prevent="cambiarVista('Permisos','fas fa-shield-alt')"
                                 v-if="puede('permisos.inicio')" >
                                 <i class="fas fa-shield-alt"></i> Permisos
@@ -82,7 +83,7 @@ const cambiarVista =(nuevaVista, icono) => {
                             <AplicacionInteresView v-else-if="titleHeader.vista=='Aplicación Intereses'"></AplicacionInteresView>
                             <AplicacionMoraView v-else-if="titleHeader.vista == 'Aplicación Moras'"></AplicacionMoraView>
                             <MonedaView v-else-if="titleHeader.vista == 'Monedas'"></MonedaView>
-                            <!-- <PermisoView v-else-if="titleHeader.vista == 'Permisos'"></PermisoView> -->
+                            <NotificacionView v-else-if="titleHeader.vista == 'Notificaciones'"></NotificacionView>
                         </div>
                     </div>
                 </div>
