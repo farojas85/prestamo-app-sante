@@ -174,6 +174,53 @@ const eliminar = (id) => {
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-md-3">
+                    Mostrando <b>{{notificaciones.from}}</b> a <b>{{ notificaciones.to }}</b> de <b>{{ notificaciones.total}}</b> Registros
+                </div>
+                <div class="col-md-3 text-right">
+                    <nav>
+                        <ul class="pagination">
+                            <li v-if="notificaciones.current_page >= 2" class="page-item">
+                                <a href="#" aria-label="Previous" class="page-link"
+                                    title="Primera Página"
+                                    @click.prevent="cambiarPagina(1)">
+                                    <span><i class="fas fa-backward-fast"></i></span>
+                                </a>
+                            </li>
+                            <li v-if="notificaciones.current_page > 1" class="page-item">
+                                <a href="#" aria-label="Previous" class="page-link"
+                                    title="Página Anterior"
+                                    @click.prevent="cambiarPagina(notificaciones.current_page - 1)">
+
+                                    <span><i class="fas fa-angle-left"></i></span>
+                                </a>
+                            </li>
+                            <li v-for="page in pagesNumber()" class="page-item"
+                                :key="page"
+                                :class="[ page == isActived() ? 'active' : '']"
+                                :title="'Página '+ page">
+                                <a href="#" class="page-link"
+                                    @click.prevent="cambiarPagina(page)">{{ page }}</a>
+                            </li>
+                            <li v-if="notificaciones.current_page < notificaciones.last_page" class="page-item">
+                                <a href="#" aria-label="Next" class="page-link"
+                                    title="Página Siguiente"
+                                    @click.prevent="cambiarPagina(notificaciones.current_page + 1)">
+                                    <span><i class="fas fa-angle-right"></i></span>
+                                </a>
+                            </li>
+                                <li v-if="notificaciones.current_page <= notificaciones.last_page-1" class="page-item">
+                                <a href="#" aria-label="Next" class="page-link"
+                                    @click.prevent="cambiarPagina(notificaciones.last_page)"
+                                    title="Última Página">
+                                    <span><i class="fas fa-forward-fast"></i></span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
         </div>
     </div>
     <NotificacionForm :form="form" @onListar="listar"></NotificacionForm>
