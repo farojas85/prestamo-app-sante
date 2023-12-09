@@ -218,12 +218,26 @@ export const useNotificacion = () => {
         }
     }
 
+    const obtenerNotificacionActiva = async (role) =>  {
+        let respond = await prestamoApi.get('/api/notificaciones/last-active?role='+role,config)
+
+        if(respond.status == 404)
+        {
+            errors.value = respond.data.error
+        }
+
+        if(respond.status == 200)
+        {
+            notificacion.value = jwtDecode(respond.data).notificacion
+        }
+    }
+
 
     return {
         errors, respuesta, form, notificacion, notificaciones, dato, roles,
         limpiar, obtenerNotificaciones, listar, buscar, isActived, pagesNumber,
         cambiarPagina, cambiarPaginacion,
         agregarNotificacion, obtenerNotificacion, actualizarNotificacion, eliminarNotificacion,
-        obtenerListaRoles
+        obtenerListaRoles, obtenerNotificacionActiva
     }
 }
