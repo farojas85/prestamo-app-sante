@@ -54,6 +54,14 @@ export const useCliente = () => {
         errors:[]
     });
 
+    const cuenta_bancaria = ref({
+        id:'',
+        cliente_id:'',
+        entidad_financiera_id:'',
+        banco:'',
+        numero_cuenta:''
+    })
+
     const limpiar = () => {
         form.value.id = null;
         form.value.tipo_documento_id='';
@@ -77,17 +85,19 @@ export const useCliente = () => {
         form.value.role = "";
         form.value.es_activo=1;
         form.value.estado_crud='';
+        //cuenta bancaria
+
+        cuenta_bancaria.value.id="";
+        cuenta_bancaria.value.cliente_id='';
+        cuenta_bancaria.value.entidad_financiera_id='';
+        cuenta_bancaria.value.banco='';
+        cuenta_bancaria.value.numero_cuenta="";
+        
         form.value.errors = [];
         errors.value = [];
     }
 
-    const cuenta_bancaria = ref({
-        id:'',
-        cliente_id:'',
-        entidad_financiera_id:'',
-        banco:'',
-        numero_cuenta:''
-    })
+   
 
     const offest = ref(2);
 

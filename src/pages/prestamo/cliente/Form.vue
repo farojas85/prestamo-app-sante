@@ -145,6 +145,7 @@ const crud = {
         form.value.errors = [];
         form.value.user_id = usuario.value.id;
         form.value.role = roles.value.slug;
+
         await actualizarCliente(form.value);
 
         if(errors.value) form.value.errors = errors.value;
@@ -163,6 +164,14 @@ const guardar = () => {
     crud[form.value.estado_crud]()
 }
 
+const onClose = () => {
+    cuenta_bancaria.value.id="";
+    cuenta_bancaria.value.cliente_id="";
+    cuenta_bancaria.value.entidad_financiera_id ="";
+    cuenta_bancaria.value.banco="";
+    cuenta_bancaria.value.numero_cuenta="";
+}
+
 </script>
 <template>
 <form @submit.prevent="guardar">
@@ -171,7 +180,8 @@ const guardar = () => {
             <div class="modal-content modal-content-demo">
                 <div class="modal-header">
                     <h6 class="modal-title" id="modal-cliente-title">Nuevo Empleado</h6>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                        @click="onClose">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -416,7 +426,8 @@ const guardar = () => {
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"
+                        @click="onClose">
                         <i class="fas fa-times fa-fw"></i>Cerrar
                     </button>
                     <button type="submit" class="btn btn-success">
