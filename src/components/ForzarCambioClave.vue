@@ -10,6 +10,18 @@ const {
     cambiarClaveForzado
 } = useAutenticacion();
 
+const verPassword = ref(false);
+
+const verPasswordRepite = ref(false);
+
+const mostrarPassword = () => {
+    verPassword.value = !verPassword.value
+}
+
+const mostrarPasswordRepirte = () => {
+    verPasswordRepite.value = !verPasswordRepite.value
+}
+
 onMounted(() => {
     dato.value.user_id = usuario.value.id;
 })
@@ -33,9 +45,7 @@ const modificarClave = async() => {
                             <p>
                                 <ul>
                                     <li>Debe ingresar mínimo 8 caracteres</li>
-                                    <li>Debe ingresar al menos una letra mayúscula</li>
-                                    <li>Debe ingresar al menos un caracter especial ( * & % $ # - _ @ ()[] )</li>
-                                    <li>Debe ingresar caracteres alfanuméricos ( [a-z][0-9] )</li>
+                                    <li>Debe ingresar caracteres alfanuméricos ([a-z][A-Z][0-9] )</li>
                                 </ul>
                             </p>
                             <p ><i>Al presionar en modificar, el sistema cerrará su sesión activa, es importante que apunte su nueva contraseña para poder acceder.</i></p>
@@ -44,16 +54,56 @@ const modificarClave = async() => {
                     <div class="from-group row">
                         <label for="" class="col-form-label col-md-3 font-weight-bold mb-2">Contraseña</label>
                         <div class="col-md-6 mb-2">
-                            <input type="password" class="form-control" v-model="dato.password" 
-                                :class="{'is-invalid': errors.password}"/>
+                            <div class="input-group mb-3" v-if="verPassword === false">
+                                <input type="password" class="form-control" v-model="dato.password" 
+                                    placeholder="Ingrese Contraseña"
+                                    :class="{'is-invalid': errors.password}"  />
+                                <div class="input-group-append" style="cursor: pointer" @click="mostrarPassword"
+                                    title="Ver Contraseña">
+                                    <span class="input-group-text bg-info">
+                                        <i class="fas fa-eye"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="input-group mb-3" v-if="verPassword === true">
+                                <input type="text" class="form-control" v-model="dato.password" 
+                                    placeholder="Ingrese Contraseña"
+                                    :class="{'is-invalid': errors.password}"  />
+                                <div class="input-group-append" style="cursor: pointer" @click="mostrarPassword"
+                                    title="Ocultar Contraseña">
+                                    <span class="input-group-text bg-secondary">
+                                        <i class="fas fa-eye-slash"></i>
+                                    </span>
+                                </div>
+                            </div>
                             <small class="text-danger" v-for="error in errors.password">{{ error }}</small>
                         </div>
                     </div>
                     <div class="from-group row">
                         <label for="" class="col-form-label col-md-3 font-weight-bold">Repite Contraseña</label>
                         <div class="col-md-6">
-                            <input type="password" class="form-control" v-model="dato.password_confirmation" 
-                                :class="{'is-invalid': errors.password_confirmation}"/>
+                            <div class="input-group mb-3" v-if="verPasswordRepite === false">
+                                <input type="password" class="form-control" v-model="dato.password_confirmation" 
+                                    placeholder="Ingrese Contraseña"
+                                    :class="{'is-invalid': errors.password_confirmation}"  />
+                                <div class="input-group-append" style="cursor: pointer" @click="mostrarPasswordRepirte"
+                                    title="Ver Contraseña">
+                                    <span class="input-group-text bg-info">
+                                        <i class="fas fa-eye"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="input-group mb-3" v-if="verPasswordRepite === true">
+                                <input type="text" class="form-control" v-model="dato.password_confirmation" 
+                                    placeholder="Ingrese Contraseña"
+                                    :class="{'is-invalid': errors.password_confirmation}"  />
+                                <div class="input-group-append" style="cursor: pointer" @click="mostrarPasswordRepirte"
+                                    title="Ocultar Contraseña">
+                                    <span class="input-group-text bg-secondary">
+                                        <i class="fas fa-eye-slash"></i>
+                                    </span>
+                                </div>
+                            </div>
                             <small class="text-danger" v-for="error in errors.password_confirmation">{{ error }}</small>
                         </div>
                     </div>
