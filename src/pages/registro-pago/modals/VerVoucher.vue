@@ -30,23 +30,17 @@ const rutaRegistroPago = import.meta.env.VITE_APP_API_URL+'/storage/registro-pag
                             <!-- <h3 v-text="voucher"></h3> -->
                         </div>
                         <div class="card-body">
-                            <div class="embed-responsive embed-responsive-16by9">
-                                <iframe class="embed-responsive-item" :src="rutaRegistroPago+voucher"
-                                    allowfullscreen></iframe>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <img  :src="rutaRegistroPago+voucher" class="img-fluid"/>
+                                </div>
                             </div>
+                            <!-- <div class="embed-responsive embed-responsive-16by9"> -->
+
+                                <!-- <iframe class="embed-responsive-item" :src="rutaRegistroPago+voucher"
+                                    allowfullscreen></iframe> -->
+                            <!-- </div> -->
                         </div>
-                        <!-- <div class="card-header">
-                            <h3 v-if="archivo.includes('CONTRATO')"  v-text="'CONTRATO'"></h3>
-                            <h3 v-if="archivo.includes('DNI_ANVERSO')"  v-text="'DNI ANVERSO'"></h3>
-                            <h3 v-if="archivo.includes('DNI_REVERSO')"  v-text="'DNI REVERSO'"></h3>
-                            <h3 v-if="archivo.includes('VOUCHER_DESEMBOLSO')"  v-text="'VOUCHER DESEMBOLSO'"></h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="embed-responsive embed-responsive-16by9">
-                                <iframe class="embed-responsive-item" :src="rutaCliente+archivo"
-                                    allowfullscreen></iframe>
-                            </div>
-                        </div> -->
                     </div>  
                 </div>
                 <div class="modal-footer">

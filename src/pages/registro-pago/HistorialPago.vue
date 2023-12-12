@@ -4,6 +4,7 @@ import { useHelper } from '../../helpers';
 import { useRegistroPago } from '../../composables/registro-pago/registro-pago';
 import { useDatosSession } from '../../composables/session';
 import verVoucherForm from './modals/VerVoucher.vue';
+import ReciboPagoForm from './modals/ReciboPago.vue';
 
 const { Swal, Toast } = useHelper();
 const {
@@ -85,9 +86,12 @@ const aceptarPago =(id) => {
 }
 
 const imprimirRecibo = ( id) => {
-    let pago = registro_pagos.value.data.find(p => p.id === id);
-    imprimirReciboPago(pago);
+    registro_pago.value = registro_pagos.value.data.find(p => p.id === id);
+    // imprimirReciboPago(pago);
+    $('#mdl-recibo-pago').modal('show');
 }
+
+
 </script>
 <template>
     <div class="row">
@@ -201,4 +205,5 @@ const imprimirRecibo = ( id) => {
         </div>
     </div>
     <verVoucherForm :vouchers="vouchers"></verVoucherForm>
+    <ReciboPagoForm :registro_pago="registro_pago"></ReciboPagoForm>
 </template>
