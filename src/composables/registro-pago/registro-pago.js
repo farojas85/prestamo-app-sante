@@ -170,6 +170,15 @@ export const useRegistroPago = () => {
         vouchers.value = datos.vouchers;
     }
 
+    const obtenerDataRegistroPagoDetalle = async(id) => {  
+        let respond = await prestamoApi.get('/api/registro-pagos/details?id='+id,config)
+
+        let datos =  jwtDecode(respond.data);
+
+        registro_pago.value = datos.registro_pago;
+        vouchers.value = datos.vouchers;
+    }
+
     const aceptarRegistroPago = async(data) =>{
         errors.value = [];
         respuesta.value = []       
@@ -268,6 +277,6 @@ export const useRegistroPago = () => {
         buscarClientesPrestamo, listarPrestamosCliente, listarCuotasPrestamo,
         obtenerListaFormaPagos, limpiarRegistroPago, obtenerListaMedioPagos,
         agregrarRegistroPago,obtenerHistorialPagos, obtenerDataRegistroPago,
-        aceptarRegistroPago, imprimirReciboPago
+        aceptarRegistroPago, imprimirReciboPago, obtenerDataRegistroPagoDetalle
     }
 }

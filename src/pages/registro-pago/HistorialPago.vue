@@ -10,7 +10,7 @@ const { Swal, Toast } = useHelper();
 const {
     respuesta,errors, registro_pagos, vouchers, registro_pago,
     limpiarRegistroPago,obtenerHistorialPagos, obtenerDataRegistroPago,
-    aceptarRegistroPago, imprimirReciboPago
+    aceptarRegistroPago, imprimirReciboPago, obtenerDataRegistroPagoDetalle
 } = useRegistroPago();
 
 const {usuario, roles} = useDatosSession();
@@ -85,8 +85,9 @@ const aceptarPago =(id) => {
     })
 }
 
-const imprimirRecibo = ( id) => {
-    registro_pago.value = registro_pagos.value.data.find(p => p.id === id);
+const imprimirRecibo = async( id) => {
+    await obtenerDataRegistroPagoDetalle(id);
+    //registro_pago.value = registro_pagos.value.data.find(p => p.id === id);
     // imprimirReciboPago(pago);
     $('#mdl-recibo-pago').modal('show');
 }

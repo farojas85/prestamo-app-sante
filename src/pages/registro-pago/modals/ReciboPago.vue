@@ -57,7 +57,7 @@ hr.new2 {
                             </tr>
                             <tr>
                                 <td style="text-align: center">
-                                    <hr style="border-top: 2px dashed black;width: 95%;margin-top: 1px;"  />
+                                    <hr style="border-top: 2px dashed black;width: 95%;margin-top: 1px;margin-bottom: 0.07rem;"  />
                                 </td>
                             </tr>
                             <tr>
@@ -70,15 +70,27 @@ hr.new2 {
                             </tr>
                             <tr>
                                 <td style="text-align: center;">
-                                    <hr style="border-top: 2px dashed black; margin-top: 0.07rem; width: 95%;"  />
+                                    <hr style="border-top: 2px dashed black; margin-top: 0.07rem; margin-bottom: 0.07rem; width: 95%;"  />
+                                </td>
+                            </tr>
+                            <tr style="margin-top: 1px">
+                                <td style="font-size: 10pt;">
+                                    <span style="margin-left: 4px;">Abonado: <b>{{ registro_pago.monto_pagado }}</b> </span><br>
+                                    <span style="margin-left: 4px;">Interes/Mora: <b>{{ registro_pago.mora ?? parseFloat(0.00).toFixed(2) }}</b></span><br>
+                                    <span style="margin-left: 4px;">Total: <b>{{ parseFloat(registro_pago.monto_pagado) + parseFloat(registro_pago.mora) }}</b></span><br>
+                                    <span style="margin-left: 4px;">Saldo: <b style="font-size: 9pt;">{{ registro_pago.saldo }}</b></span><br>
                                 </td>
                             </tr>
                             <tr>
+                                <td style="text-align: center;">
+                                    <hr style="border-top: 2px dashed black; margin-top: 0.07rem; margin-bottom: 0.07rem; width: 95%;"  />
+                                </td>
+                            </tr>
+                            <tr style="margin-top: 1px">
                                 <td style="font-size: 10pt;">
-                                    <span style="margin-left: 4px;">Abonado: <b>{{ registro_pago.total }}</b> </span><br>
-                                    <span style="margin-left: 4px;">Interes/Mora: <b>{{ registro_pago.mora ?? parseFloat(0.00).toFixed(2) }}</b></span><br>
-                                    <span style="margin-left: 4px;">Fecha: <b>{{ registro_pago.fecha }}</b></span><br>
-                                    <span style="margin-left: 4px;">Cliente: <b style="font-size: 9pt;">{{ registro_pago.cliente }}</b></span><br>
+                                    <span style="margin-left: 4px;">Cuotas Pagadas:</span><b style="float: right;margin-right: 2rem;">{{ registro_pago.cuotas_pagadas+' de '+registro_pago.numero_cuotas }}</b><br>
+                                    <span style="margin-left: 4px;">Cuotas Abonadas:</span><b style="float: right;margin-right: 2rem;">{{ registro_pago.cuotas_abonadas }}</b><br>
+                                    <span style="margin-left: 4px;">Día Prestado: </span><b style="float: right;margin-right: 2rem;">{{ registro_pago.fecha_prestamo }}</b>
                                 </td>
                             </tr>
                         </table>                        
