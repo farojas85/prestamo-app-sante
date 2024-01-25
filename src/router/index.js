@@ -12,6 +12,7 @@ import Empleado from '../pages/empleado/Inicio.vue';
 import Prestamo from '../pages/prestamo/Inicio.vue';
 import Configuraciones from '../pages/iniciales/Configuraciones.vue';
 import RegistroPago from '../pages/registro-pago/Inicio.vue';
+import Inversion from '../pages/inversion/Inicio.vue';
 
 const routes = [
     {
@@ -46,14 +47,10 @@ const routes = [
         path: '/registro-pago', name:'Registro Pagos', component: RegistroPago ,
         meta:{layout: DefaultLayout, icono: 'fas fa-money-check-dollar fa-fw'}
     },
-    // {
-    //     path: '/almacen', name:'Almacén', component: Almacen ,
-    //     meta:{ layout: DefaultLayout, icono: 'fa-solid fa-boxes-stacked fa-fw'}
-    // },
-    // {
-    //     path: '/cotizaciones', name:'Almacén', component: Cotizaciones ,
-    //     meta:{ layout: DefaultLayout, icono: 'fas fa-shopping-cart'}
-    // }    
+    {
+        path: '/inversion', name:'Inversión', component: Inversion ,
+        meta:{layout: DefaultLayout, icono: 'fas fa-money-bill-wheat fa-fw'}
+    },
 ];
 
 export default createRouter({

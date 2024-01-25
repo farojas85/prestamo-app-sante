@@ -8,6 +8,7 @@ import TipoAccesoView from './tipo-acceso/Inicio.vue';
 import RoleView from './role/Inicio.vue';
 import MenuView from './menu/Inicio.vue';
 import PermisoView from './permiso/Inicio.vue';
+import InversionistaView from './inversionista/Inicio.vue';
 
 const { usuario, puede } = useDatosSession();
 
@@ -72,11 +73,11 @@ const cambiarVista =(nuevaVista, icono) => {
                                 v-if="puede('permisos.inicio')" >
                                 <i class="fas fa-shield-alt"></i> Permisos
                             </button>
-                            <!-- <button class="btn btn-app bg-primary"
-                                @click.prevent="cambiarVista('Permisos - Roles','fas fa-user-shield')"
-                                v-if="puede('permiso-role.inicio')">
-                                <i class="fas fa-user-shield"></i> Permisos / Roles
-                            </button> -->
+                            <button class="btn btn-app bg-primary"
+                                @click.prevent="cambiarVista('Inversionistas','fas fa-users-between-lines')"
+                                v-if="puede('inversionistas.inicio')">
+                                <i class="fas fa-users-between-lines"></i> Inversionistas
+                            </button>
                         </div>
                         <div class="card-body">
                             <UsuarioView v-if="titleHeader.vista=='Usuarios'"></UsuarioView>
@@ -84,6 +85,7 @@ const cambiarVista =(nuevaVista, icono) => {
                             <RoleView v-else-if="titleHeader.vista == 'Roles'"></RoleView>
                             <MenuView v-else-if="titleHeader.vista == 'Menús'"></MenuView>
                             <PermisoView v-else-if="titleHeader.vista == 'Permisos'"></PermisoView>
+                            <InversionistaView v-else-if="titleHeader.vista == 'Inversionistas'"></InversionistaView>
                         </div>
                     </div>
                 </div>

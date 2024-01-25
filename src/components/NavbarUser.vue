@@ -2,9 +2,11 @@
 import { toRefs } from 'vue';
 import { useAutenticacion } from '../composables/autentication.js';
 import { useHelper } from '../helpers';
+import { useDatosSession } from '../composables/session';
 
 const { logoutUsuario } = useAutenticacion();
 const { Swal } = useHelper();
+const { puede } = useDatosSession();
 
 const props = defineProps({
     usuario: Object
@@ -44,10 +46,12 @@ const cerrarSesion = async () => {
             <a href="#" class="dropdown-item">
                 <i class="fas fa-id-badge fa-fw mr-2"></i> Mi Perfil
             </a>
-            <div class="dropdown-divider"></div>
-            <a href="/configuraciones" class="dropdown-item">
-                <i class="fas fa-gear mr-2"></i> Configuraciones
-            </a>
+            <template v-if="puede('configuraciones-empresa.inicio')">
+                <div class="dropdown-divider"></div>
+                <a href="/configuraciones" class="dropdown-item">
+                    <i class="fas fa-gear mr-2"></i> Configuraciones
+                </a>
+            </template>
             <div class="dropdown-divider"></div>
             <a href="" class="dropdown-item" @click.prevent="cerrarSesion">
                 <i class="fas fa-power-off fa-fw mr-2"></i> Cerrar Sesi&oacute;n

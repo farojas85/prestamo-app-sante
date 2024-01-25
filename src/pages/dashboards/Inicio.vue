@@ -5,6 +5,7 @@ import DashboardAdmin from './DashboardAdmin.vue';
 import DashboardGerente from './DashboardGerente.vue';
 import DashboardLiderSuperior from './DashboardLiderSuperior.vue';
 import DashboardLider from './DashboardLider.vue';
+import DashboardInversionista from './DashboardInversionista.vue';
 
 const {
     roles
@@ -16,4 +17,5 @@ const {
     <DashboardGerente v-else-if="roles.slug=='gerente'"></DashboardGerente>
     <DashboardLiderSuperior v-else-if="roles.slug=='lider-superior'"></DashboardLiderSuperior>
     <DashboardLider v-else-if="roles.slug=='lider'"></DashboardLider>
+    <DashboardInversionista v-else-if="roles.slug=='inversionista'"></DashboardInversionista>
 </template>
