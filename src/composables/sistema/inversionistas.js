@@ -71,7 +71,7 @@ export const useInversionista = () => {
         form.value.email='';
         form.value.foto='';
         form.value.password='';
-        form.value.role_id=6;
+        form.value.role_id='';
         form.value.persona_id='';
         form.value.user_id='';
         form.value.es_activo=1;

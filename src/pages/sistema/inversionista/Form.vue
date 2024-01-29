@@ -34,6 +34,8 @@ onMounted(() => {
     obtenerListaSexos();
     obtenerListaRoles();
     obteneListaDepartamentos();
+    console.log(roles.value);
+    //form.value.role_id = 
 });
 
 const obtenerPersona = async() => {
@@ -338,20 +340,21 @@ const guardar = () => {
                                                     <small class="text-danger" v-for="error in form.errors.email" :key="error">{{error }}</small>
                                                 </div>
                                             </div>
-                                            <div class="form-group row">
+                                            <!-- <div class="form-group row">
                                                 <label for="role" class="col-form-label col-form-label-sm col-md-3 mb-1">Rol:</label>
                                                 <div class="col-md-9 mb-1">
                                                     <select class="form-control form-control-sm"
                                                         v-model="form.role_id" id="role"
                                                         :class="{ 'is-invalid' : form.errors.role_id}"
-                                                        disabled
+                                                        
                                                         >
                                                         <option value="">-Seleccionar-</option>
-                                                        <option v-for="rol in roles" :value="rol.id" >{{ rol.nombre }}</option>
+                                                        <option v-for="rol in roles" :value="rol.id" 
+                                                            >{{ rol.nombre }}</option>
                                                     </select>
                                                     <small class="text-danger" v-for="error in form.errors.role_id" :key="error">{{error }}</small>
                                                 </div>
-                                            </div>
+                                            </div> -->
                                             <!-- <div class="form-group row" v-if="form.estado_crud=='nuevo'">
                                                 <label for="password" class="col-form-label col-form-label-sm col-md-3 mb-1">Contrase&ntilde;a:</label>
                                                 <div class="col-md-9 mb-1">

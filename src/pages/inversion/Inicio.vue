@@ -3,6 +3,7 @@ import { onMounted, ref, inject } from 'vue';
 import { defineTitle } from '../../helpers';
 import ContentHeader from '../../components/ContentHeader.vue';
 import { useDatosSession } from '../../composables/session';
+import HistorialInversionForm from './Historial.vue';
 
 const { usuario, puede } = useDatosSession();
 
@@ -43,11 +44,14 @@ const cambiarVista =(nuevaVista, icono) => {
                                 v-if="puede('registro-inversiones.historial')">
                                 <i class="fas fa-file-invoice-dollar"></i> Historial Inversiones
                             </button>
-                            <button class="btn btn-app bg-primary"
+                            <!-- <button class="btn btn-app bg-primary"
                                 @click.prevent="cambiarVista('Registro Inversión','fas fa-hand-holding-dollar')"
                                 v-if="puede('registro-inversiones.nuevo')">
                                 <i class="fas fa-hand-holding-dollar"></i> Registrar Inversiones
-                            </button>
+                            </button> -->
+                        </div>
+                        <div class="card-body">
+                            <HistorialInversionForm v-if="titleHeader.titulo=='Historial Inversión'"></HistorialInversionForm>
                         </div>
                     </div>
                 </div>
