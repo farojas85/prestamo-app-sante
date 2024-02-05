@@ -3,14 +3,14 @@ import { ref, onMounted, computed } from 'vue';
 import { useHelper } from '../../helpers';
 import { useHistorialInversion } from '../../composables/registro-inversion/historial-inversion';
 import { useDatosSession } from '../../composables/session';
-import RetgistroForm from './Registro.vue';
+import RegistroForm from './Registro.vue';
 
 const { Swal, Toast } = useHelper();
 
 const {
-    form, dato, inversiones, errors, respuesta,
+    form, dato, inversiones, errors, respuesta, tasa_interes,
     listar, buscar, isActived, pagesNumber, cambiarPaginacion, cambiarPagina,
-    limpiar
+    limpiar, obtenerTasaInteresInversion
 } = useHistorialInversion();
 
 const {usuario, roles} = useDatosSession();
@@ -25,11 +25,12 @@ const nuevo = () => {
     limpiar();
 
     form.value.estado_crud = 'nuevo';
-    (
-        document.getElementById('modal-permiso-title')
-    ).innerHTML ="Nuevo Permiso";
 
-    $('#modal-permiso').modal('show')
+    (
+        document.getElementById('modal-registro-title')
+    ).innerHTML ="Nuevo Registro de Inversión";
+
+    $('#modal-registro').modal('show')
 
 }
 </script>
@@ -41,7 +42,7 @@ const nuevo = () => {
                     <h5 class="card-title">
                         Historial de Inversiones
                         <a class="btn btn-danger btn-sm ml-1"
-                            @click.prevent="nuevo" >
+                            @click="nuevo" >
                             <i class="fa fa-plus"></i>
                         </a>
                     </h5>
@@ -149,5 +150,5 @@ const nuevo = () => {
             </div>
         </div>
     </div>
-    <RetgistroForm :form="form"></RetgistroForm>
+    <RegistroForm :form="form" :onListar="listar"></RegistroForm>
 </template>

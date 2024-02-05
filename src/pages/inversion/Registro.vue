@@ -1,7 +1,7 @@
 <script setup>
 import { toRefs, onMounted } from 'vue';
 import {useHelper} from '../../helpers';
-import { useMenu } from '../../composables/sistema/menus';
+import { useHistorialInversion } from '../../composables/registro-inversion/historial-inversion';
 
 const props = defineProps({
     form: Object
@@ -14,19 +14,19 @@ const { Toast } = useHelper();
 const { form } = toRefs(props);
 
 const {
-    errors, respuesta, padres,
-    agregarMenu, actualizarMenu, obtenerListaPadres
-} = useMenu();
+    errors, respuesta, tasa_interes,
+    obtenerTasaInteresInversion, agregrarRegistroInversion
+} = useHistorialInversion();
 
 onMounted(() => {
-    obtenerListaPadres();
+    obtenerTasaInteresInversion('Interés Inversión');    
 });
 
 const crud = {
     'nuevo': async() => {
 
         form.value.errors = [];
-        await agregarMenu(form.value);
+        await agregrarRegistroInversion(form.value);
 
         if(errors.value) form.value.errors = errors.value;
 
@@ -34,9 +34,10 @@ const crud = {
         {
             form.value.errors = [];
             Toast.fire({icon:'success', title:respuesta.value.mensaje})
-            $('#modal-menu').modal('hide')
+            $('#modal-registro').modal('hide')
             emit('onListar')
         }
+
     },
     'editar': async() => {
         form.value.errors = [];
@@ -48,7 +49,7 @@ const crud = {
         {
             form.value.errors = [];
             Toast.fire({icon:'success', title:respuesta.value.mensaje})
-            $('#modal-menu').modal('hide')
+            $('#modal-registro').modal('hide')
             emit('onListar')
         }
     },
@@ -62,82 +63,37 @@ const guardar = () => {
 
 <template>
 <form @submit.prevent="guardar">
-    <div class="modal fade" id="modal-menu">
+    <div class="modal fade" id="modal-registro">
         <div class="modal-dialog" role="document">
             <div class="modal-content modal-content-demo">
                 <div class="modal-header">
-                    <h6 class="modal-title" id="modal-menu-title">Nuevo Tipo de Actividad</h6>
+                    <h6 class="modal-title" id="modal-registro-title">Nueva Inversi&oacute;n</h6>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group row">
-                        <label for="nombre" class="col-form-label col-form-label-sm col-md-3 mb-1">Nombre:</label>
+                        <label for="monto" class="col-form-label col-form-label-sm col-md-3 mb-1">Monto:</label>
                         <div class="col-md-9 mb-1">
-                            <input type="text" class="form-control form-control-sm" name="nombre"
-                                v-model="form.nombre"
-                                :class="{ 'is-invalid' : form.errors.nombre}" placeholder="nombre de Tipo de Acceso"
+                            <input type="text" class="form-control form-control-sm" name="monto"
+                                v-model="form.monto"
+                                :class="{ 'is-invalid' : form.errors.monto}" placeholder="Ingrese monto de inversión"
                                 >
-                            <small class="text-danger" v-for="error in form.errors.nombre" :key="error">{{error }}</small>
+                            <small class="text-danger" v-for="error in form.errors.monto" :key="error">{{error }}</small>
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="slug" class="col-form-label col-form-label-sm col-md-3 mb-1">Slug:</label>
+                        <label for="tasa_interes" class="col-form-label col-form-label-sm col-md-3 mb-1">Tasa de Interés:</label>
                         <div class="col-md-9 mb-1">
-                            <input type="text" class="form-control form-control-sm" name="slug"
-                                v-model="form.slug"
-                                :class="{ 'is-invalid' : form.errors.slug}" placeholder="Ruta de Acceso"
-                                >
-                            <small class="text-danger" v-for="error in form.errors.slug" :key="error">{{error }}</small>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label for="slug" class="col-form-label col-form-label-sm col-md-3 mb-1">
-                            Icono: 
-                            <a class="btn btn-xs btn-info" href="https://fontawesome.com/search?o=r&m=free" target="_blank">
-                                <i class="fa-solid fa-link"></i>
-                            </a>
-                        </label>
-                        <div class="col-md-9 mb-1">
-                            <input type="text" class="form-control form-control-sm" name="icono"
-                                v-model="form.icono"
-                                :class="{ 'is-invalid' : form.errors.icono}" placeholder="fa fa-icono"
-                                >
-                            <small class="text-danger" v-for="error in form.errors.icono" :key="error">{{error }}</small>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label for="padre" class="col-form-label col-form-label-sm col-md-3 mb-1">Padre:</label>
-                        <div class="col-md-9 mb-1">
-                            <select class="form-control form-control-sm" name="padre"
-                                v-model="form.padre_id"
-                                :class="{ 'is-invalid' : form.errors.padre_id}">
+                            <select class="form-control form-control-sm"
+                                v-model="form.tasa_interes" id="tasa_interes" name="tasa_interes"
+                                :class="{ 'is-invalid' : form.errors.tasa_interes}"
+                                :disabled="form.estado_crud=='mostrar'">
                                 <option value="">-Seleccionar-</option>
-                                <option v-for="tipo in padres" :value="tipo.id">{{ tipo.nombre }}</option>
+                                <option v-for="tasa in tasa_interes" :value="tasa.valor" >{{ tasa.valor }}</option>
                             </select>
-                            <small class="text-danger" v-for="error in form.errors.padre_id" :key="error">{{error }}</small>
-                        </div>
-                    </div>
-                    <div class="form-group row" v-if="form.estado_crud!= 'nuevo'">
-                        <label for="orden" class="col-form-label col-form-label-sm col-md-3 mb-1"> Orden:</label>
-                        <div class="col-md-9 mb-1">
-                            <input type="number" class="form-control form-control-sm" name="orden"
-                                v-model="form.orden"
-                                :class="{ 'is-invalid' : form.errors.orden}" placeholder="Ruta de Acceso"
-                                >
-                            <small class="text-danger" v-for="error in form.errors.orden" :key="error">{{error }}</small>
-                        </div>
-                    </div>
-                    <div class="form-group row" v-if="form.estado_crud!='nuevo'">
-                        <label class="col-form-label col-form-label-sm col-md-3">Estado</label>
-                        <div class="col-md-9">
-                            <div class="custom-control custom-checkbox">
-                                <input class="custom-control-input" type="checkbox" id="customCheckbox2" v-model="form.es_activo" :value="form.es_activo">
-                                <label for="customCheckbox2" class="custom-control-label">{{ form.es_activo ==1 ? 'Activo' : 'Inactivo' }}</label>
-                            </div>
-                            <small class="text-danger" v-for="error in errors.es_activo"
-                                :key="error">{{error }}</small>
+                            <small class="text-danger" v-for="error in form.errors.tasa_interes" :key="error">{{error }}</small>
                         </div>
                     </div>
                 </div>
