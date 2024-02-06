@@ -42,6 +42,7 @@ const nuevo = () => {
                     <h5 class="card-title">
                         Historial de Inversiones
                         <a class="btn btn-danger btn-sm ml-1"
+                            v-if="roles.slug=='inversionista'"
                             @click="nuevo" >
                             <i class="fa fa-plus"></i>
                         </a>
@@ -91,8 +92,11 @@ const nuevo = () => {
                                         <tr>                                            
                                             <th class="text-center">#</th>
                                             <th class="text-center">Fecha</th>
+                                            <th v-if="roles.slug!=='inversionista'">Inversionista</th>
                                             <th class="text-center">Monto</th>
-                                            <th class="text-center">Tasa Interés (%)</th>
+                                            <th class="text-center">Tasa Interés mensual(%)</th>
+                                            <th class="text-center">Dias transcurridos</th>
+                                            <th class="text-center">Rentabilidad en días</th>
                                             <!-- <th class="text-center">Detalle</th> -->
                                             <!-- <th>Cliente</th> -->
                                             <!-- <th>Forma Pago</th>
@@ -109,8 +113,11 @@ const nuevo = () => {
                                         <tr v-else v-for="(inv,index) in inversiones.data">
                                             <td class="text-center" v-text="index+inversiones.from"></td>
                                             <td class="text-center" v-text="inv.fecha"></td>
-                                            <td class="text-center">{{ parseFloat(inv.monto).toFixed(2) }}</td>
+                                            <td v-if="roles.slug!=='inversionista'" v-text="inv.inversionista"></td>
+                                            <td class="text-center">{{ parseFloat(inv.monto).toFixed(2) }}</td>                                            
                                             <td class="text-center" v-text="inv.tasa_interes"></td>
+                                            <td class="text-center" v-text="inv.dias_transcurridos"></td>
+                                            <td class="text-center" v-text="inv.rentabilidad_diaria"></td>
                                             <!-- <td v-text="inv.cliente"></td> -->
                                             <!-- <td v-text="inv.forma_inv"></td>
                                             <td v-text="inv.medio_inv"></td> -->
