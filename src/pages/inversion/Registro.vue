@@ -14,12 +14,14 @@ const { Toast } = useHelper();
 const { form } = toRefs(props);
 
 const {
-    errors, respuesta, tasa_interes,
-    obtenerTasaInteresInversion, agregrarRegistroInversion
+    errors, respuesta, tasa_interes, inversionistas,
+    obtenerTasaInteresInversion, agregrarRegistroInversion, actualizarRegistroInversion,
+    obtenerListaInversionistas
 } = useHistorialInversion();
 
 onMounted(() => {
     obtenerTasaInteresInversion('Interés Inversión');    
+    obtenerListaInversionistas();
 });
 
 const crud = {
@@ -33,24 +35,24 @@ const crud = {
         if(respuesta.value.ok==1)
         {
             form.value.errors = [];
-            Toast.fire({icon:'success', title:respuesta.value.mensaje})
-            $('#modal-registro').modal('hide')
-            emit('onListar')
+            Toast.fire({icon:'success', title:respuesta.value.mensaje});
+            $('#modal-registro').modal('hide');
+            emit('onListar');
         }
 
     },
     'editar': async() => {
         form.value.errors = [];
-        await actualizarMenu(form.value);
+        await actualizarRegistroInversion(form.value);
 
         if(errors.value) form.value.errors = errors.value;
 
         if(respuesta.value.ok==1)
         {
             form.value.errors = [];
-            Toast.fire({icon:'success', title:respuesta.value.mensaje})
-            $('#modal-registro').modal('hide')
-            emit('onListar')
+            Toast.fire({icon:'success', title:respuesta.value.mensaje});
+            $('#modal-registro').modal('hide');
+            emit('onListar');
         }
     },
 }
@@ -74,6 +76,29 @@ const guardar = () => {
                 </div>
                 <div class="modal-body">
                     <div class="form-group row">
+                        <label for="fecha" class="col-form-label col-form-label-sm col-md-3 mb-1">Fecha:</label>
+                        <div class="col-md-9 mb-1">
+                            <input type="date" class="form-control form-control-sm" name="fecha"
+                                v-model="form.fecha"
+                                :class="{ 'is-invalid' : form.errors.fecha}" placeholder="Ingrese fecha de inversión"
+                                >
+                            <small class="text-danger" v-for="error in form.errors.fecha" :key="error">{{error }}</small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="inversionista" class="col-form-label col-form-label-sm col-md-3 mb-1">Inversionista:</label>
+                        <div class="col-md-9 mb-1">
+                            <select class="form-control form-control-sm"
+                                v-model="form.inversionista_id" id="inversionista" name="inversionista"
+                                :class="{ 'is-invalid' : form.errors.inversionista}"
+                                :disabled="form.estado_crud=='mostrar'">
+                                <option value="">-Seleccionar-</option>
+                                <option v-for="inv in inversionistas" :value="inv.id" >{{ inv.apellidos_nombres }}</option>
+                            </select>
+                            <small class="text-danger" v-for="error in form.errors.inversionista_id" :key="error">{{error }}</small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
                         <label for="monto" class="col-form-label col-form-label-sm col-md-3 mb-1">Monto:</label>
                         <div class="col-md-9 mb-1">
                             <input type="text" class="form-control form-control-sm" name="monto"
@@ -91,7 +116,7 @@ const guardar = () => {
                                 :class="{ 'is-invalid' : form.errors.tasa_interes}"
                                 :disabled="form.estado_crud=='mostrar'">
                                 <option value="">-Seleccionar-</option>
-                                <option v-for="tasa in tasa_interes" :value="tasa.valor" >{{ tasa.valor }}</option>
+                                <option v-for="tasa in tasa_interes" :value="tasa.valor.toFixed(2)" >{{ tasa.valor.toFixed(2) }}</option>
                             </select>
                             <small class="text-danger" v-for="error in form.errors.tasa_interes" :key="error">{{error }}</small>
                         </div>
