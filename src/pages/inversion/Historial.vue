@@ -22,6 +22,10 @@ onMounted(() => {
     obtenerListaInversionistas()
     
     dato.value.user = '%';
+    if(roles.value.slug=='inversionista')
+    {
+        dato.value.user = usuario.value.id
+    }
     dato.value.role = roles.value.slug
     listar();
 });
