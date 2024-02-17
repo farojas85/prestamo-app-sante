@@ -44,8 +44,7 @@ const cambiarVista =(nuevaVista, icono) => {
                                 <i class="fas fa-handshake-angle"></i> Prestamos
                             </button>
                             <button class="btn btn-app bg-primary"
-                                @click.prevent="cambiarVista('Clientes','fas fa-users')"
-                                v-if="puede('clientes.inicio')">
+                                @click.prevent="cambiarVista('Clientes','fas fa-users')">
                                 <i class="fas fa-users-line"></i> Clientes
                             </button>
                         </div>

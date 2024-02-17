@@ -1,7 +1,10 @@
 import { ref } from "vue";
 import { jwtDecode } from 'jwt-decode';
 import { prestamoApi } from "../../api";
-import { getConfigHeader, getdataParamsPagination, getConfigHeaderPost,getConfigHeaderUpload } from "../../helpers";
+import { 
+    getConfigHeader, getdataParamsPagination, getConfigHeaderPost,
+    getConfigHeaderUpload, getdataParamsPaginationByRoleUser 
+} from "../../helpers";
 
 export const useCliente = () => {
     const errors = ref([]);
@@ -11,6 +14,7 @@ export const useCliente = () => {
     const configUploadPost = getConfigHeaderUpload();
     const cliente = ref({});
     const clientes = ref([]);
+    const lideres = ref([]);
     const tipoDocumentos = ref([]);
     const sexos = ref([]);
     const persona = ref({});
@@ -25,6 +29,10 @@ export const useCliente = () => {
         page: 1,
         paginacion: 10,
         buscar:'',
+        role: '',
+        user:'',
+        lider:'',
+        user_superior:''
     });
 
     const form = ref({
@@ -102,7 +110,7 @@ export const useCliente = () => {
     const offest = ref(2);
 
     const obtenerClientes = async() => {
-        let dataParam = getdataParamsPagination(dato.value);
+        let dataParam = getdataParamsPaginationByRoleUser(dato.value);
         let respond = await prestamoApi.get('/api/clientes'+dataParam,config);
 
         if(respond.status == 404)
@@ -200,7 +208,6 @@ export const useCliente = () => {
             entidad_financieras.value = jwtDecode(respond.data).entidad_financieras
         }
     }
-
 
     const buscarDatosDni = async(data) => {
         let respond = await prestamoApi.get('/api/personas/dni?numero_documento='+data.numero_documento+'&tipo_documento_id='+data.tipo_documento_id, config)
@@ -363,16 +370,23 @@ export const useCliente = () => {
 
         empleados.value = jwtDecode(respond.data).empleados
     }
+
+    const obtenerListaLideres = async(data) => {
+
+        let respond = await prestamoApi.get('/api/empleados/lideres?role='+data.role+'&user_id='+data.user,config);
+
+        lideres.value = jwtDecode(respond.data).lideres
+    }
     
     return {
         errors, respuesta, cliente, clientes, dato, form, tipoDocumentos, sexos, persona,
         departamentos, provincias, distritos, entidad_financieras, cuenta_bancaria, archivos,
-        empleados,
+        empleados, lideres,
         listar, obtenerClientes, buscar, isActived, pagesNumber,
         cambiarPagina, cambiarPaginacion, limpiar, obtenerListaTipoDocumentos, obtenerListaSexos,
         obteneListaDepartamentos, obteneListaProvincias, obteneListaDistritos, obtenerListaEntidadFinancieras,
         buscarDatosDni, agregarCliente, obtenerCliente, actualizarCliente, subirAnversoDni, subirReversoDni,
-        verDocumentos, obtenerListaEmpleados
+        verDocumentos, obtenerListaEmpleados, obtenerListaLideres
     }
 
 }

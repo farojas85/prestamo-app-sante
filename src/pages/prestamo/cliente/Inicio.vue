@@ -2,20 +2,29 @@
 import { ref, onMounted } from 'vue';
 import { useHelper } from '../../../helpers';
 import { useCliente } from '../../../composables/prestamo/clientes';
+import { useDatosSession } from '../../../composables/session';
 import ClienteForm from './Form.vue';
 import VerDocumentosForm from './modals/VerDocumentos.vue';
 
 const { Toast, Swal } = useHelper();
+
+const { usuario, roles } = useDatosSession();
+
 const {
     form, dato, clientes, errors, respuesta, cliente,
-    provincias,distritos, archivos,
+    provincias,distritos, archivos, lideres,
     listar, buscar, isActived, pagesNumber, cambiarPaginacion, cambiarPagina,
-    limpiar, obtenerCliente, subirAnversoDni, subirReversoDni, verDocumentos
+    limpiar, obtenerCliente, subirAnversoDni, subirReversoDni, verDocumentos,
+    obtenerListaLideres
 } = useCliente();
 
 
 onMounted(() => {
+    dato.value.role = roles.value.slug;
+    dato.value.user = usuario.value.id;
+    dato.value.lider = '%';
     listar();
+    obtenerListaLideres(dato.value)
 })
 
 const nuevo = () => {
@@ -175,6 +184,20 @@ const mostrarDocumentos = async(id) => {
                         </select>
                     </div>
                 </div>
+                <div class="col-md-4 mb-1" v-if="roles.slug!='lider'">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" v-if="['super-usuario','gerente'].includes(roles.slug)">L&iacute;der Superior</span>
+                            <span class="input-group-text" v-else-if="['lider-superior'].includes(roles.slug)">L&iacute;der</span>
+                        </div>
+                        <select class="form-control" v-model="dato.lider"
+                            @change="listar(1)">
+                            <option value="">-Seleccionar-</option>
+                            <option value="%">TODOS</option>
+                            <option v-for="lider in lideres" :value="lider.id" v-text="lider.empleado"></option>
+                        </select>
+                    </div>
+                </div>
                 <div class="col-md-6 mb-1">
                     <div class="input-group">
                         <div class="input-group-prepend">
@@ -195,7 +218,7 @@ const mostrarDocumentos = async(id) => {
                                     <th class="text-center">Nro. Documento</th>
                                     <th class="text-center">Apellidos y Nombres</th>
                                     <th class="text-center">Tel&eacute;fono</th>
-                                    <th class="text-center">Lider</th>
+                                    <th class="text-center" v-if="roles.slug!='lider'">Lider</th>
                                     <th class="text-center">valoración</th>
                                     <th class="text-center">Acciones</th>
                                 </tr>
@@ -211,7 +234,7 @@ const mostrarDocumentos = async(id) => {
                                     <td class="text-center" v-text="cli.numero_documento"></td>
                                     <td class="text-left" v-text="cli.apellidos_nombres"></td>
                                     <td class="text-center" v-text="cli.telefono"></td>
-                                    <td v-text="cli.lider"></td>
+                                    <td v-text="cli.lider" v-if="roles.slug!='lider'"></td>
                                     <td></td>
                                     <td>
                                         <template v-if="cli.es_activo==1">

@@ -19,6 +19,12 @@ export const getdataParamsPaginationByUser = ( data) => {
             +"&user="+user+"&role="+role;
 }
 
+export const getdataParamsPaginationByRoleUser = ( data) => {
+    
+    return "?page=" + data.page + "&paginacion="+ data.paginacion + "&buscar=" +data.buscar
+            +"&user="+data.user+"&role="+data.role+'&lider='+data.lider;
+}
+
 export const getConfigHeader = () => {
 
     if(localStorage.getItem('token-api'))
