@@ -5,17 +5,20 @@ import { useCliente } from '../../../composables/prestamo/clientes';
 import { useDatosSession } from '../../../composables/session';
 import ClienteForm from './Form.vue';
 import VerDocumentosForm from './modals/VerDocumentos.vue';
+import PrePrestamoForm from './modals/PrePrestamo.vue';
 
 const { Toast, Swal } = useHelper();
 
 const { usuario, roles } = useDatosSession();
 
+const clienteSeleccionado = ref("");
+
 const {
     form, dato, clientes, errors, respuesta, cliente,
-    provincias,distritos, archivos, lideres,
+    provincias,distritos, archivos, lideres,tipoDocumentos,
     listar, buscar, isActived, pagesNumber, cambiarPaginacion, cambiarPagina,
     limpiar, obtenerCliente, subirAnversoDni, subirReversoDni, verDocumentos,
-    obtenerListaLideres
+    obtenerListaLideres, obtenerListaTipoDocumentos
 } = useCliente();
 
 
@@ -151,8 +154,15 @@ const subirDniReverso = async(id) => {
 
 const mostrarDocumentos = async(id) => {
     await verDocumentos(id);
-    $('#mld-ver-documentos').modal('show')
+    $('#mld-ver-documentos').modal('show');
 }
+
+const nuevoPrestamo = async (id) => {
+    await obtenerCliente(id);
+    clienteSeleccionado.value = cliente.value
+    $('#modal-nuevo-prestamo').modal('show');
+}
+
 </script>
 <template>
     <div class="card card-primary card-outline">
@@ -243,8 +253,14 @@ const mostrarDocumentos = async(id) => {
                                                 @click.prevent="editar(cli.id)">
                                                 <i class="fas fa-edit"></i>
                                             </button>
+                                            <button type="button" class="btn bg-purple btn-sm mr-1"
+                                                title="Nuevo Préstamo"
+                                                v-if="['super-usuario','gerente','lider'].includes(roles.slug)"
+                                                @click="nuevoPrestamo(cli.id)">
+                                                <i class="fa-solid fa-square-plus"></i>
+                                            </button>
                                             <button type="button" class="btn btn-primary btn-sm dropdown-toggle mr-1" 
-                                                data-toggle="dropdown">
+                                                data-toggle="dropdown" >
                                                 <i class="fas fa-folder-closed"></i>
                                             </button>
                                             <div class="dropdown-menu table-warning">
@@ -319,4 +335,5 @@ const mostrarDocumentos = async(id) => {
     </div>
     <ClienteForm :form="form" @onListar="listar"></ClienteForm>
     <VerDocumentosForm :archivos="archivos"></VerDocumentosForm>
+    <PrePrestamoForm :clientepr="clienteSeleccionado"></PrePrestamoForm>
 </template>

@@ -38,12 +38,12 @@ const cambiarVista =(nuevaVista, icono) => {
                 <div class="col-md-12">
                     <div class="card">
                         <div class="card-header">
-                            <button class="btn btn-app bg-primary"
+                            <button type="button" class="btn btn-app bg-primary"
                                 @click.prevent="cambiarVista('Préstamos','fas fa-handshake-angle')"
                                 v-if="puede('tipo-accesos.inicio')">
                                 <i class="fas fa-handshake-angle"></i> Prestamos
                             </button>
-                            <button class="btn btn-app bg-primary"
+                            <button type="button" class="btn btn-app bg-primary"
                                 @click.prevent="cambiarVista('Clientes','fas fa-users')">
                                 <i class="fas fa-users-line"></i> Clientes
                             </button>
