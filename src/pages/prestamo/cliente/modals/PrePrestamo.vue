@@ -26,7 +26,7 @@ const { clientepr } = toRefs(props);
                                     <h4 class="card-title">Datos Cliente</h4>
                                 </div>
                                 <div class="card-body">
-                                    <div class="form-group row">
+                                    <!-- <div class="form-group row">
                                         <label for="numero_documento_pre" class="col-form-label col-form-label-sm col-md-3 mb-1"> Nro. Documento:</label>
                                         <div class="col-md-9 mb-1">
                                             <input type="text" class="form-control form-control-sm" id="numero_documento_pre"
@@ -45,7 +45,7 @@ const { clientepr } = toRefs(props);
                                                 readonly
                                             />
                                         </div>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </div>
                         </div>

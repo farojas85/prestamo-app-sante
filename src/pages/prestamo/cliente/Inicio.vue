@@ -11,7 +11,27 @@ const { Toast, Swal } = useHelper();
 
 const { usuario, roles } = useDatosSession();
 
-const clienteSeleccionado = ref("");
+const clienteSeleccionado = ref({
+    id:'',
+    numero_documento:'',
+    nombres:'',
+    apellido_paterno:'',
+    apellido_materno:'',
+    telefono:'',
+    direccion:''
+});
+
+const limpiarClienteSeleccionado = () => {
+    clienteSeleccionado.value = {
+        id:'',
+        numero_documento:'',
+        nombres:'',
+        apellido_paterno:'',
+        apellido_materno:'',
+        telefono:'',
+        direccion:''
+    }
+}
 
 const {
     form, dato, clientes, errors, respuesta, cliente,
@@ -159,7 +179,9 @@ const mostrarDocumentos = async(id) => {
 
 const nuevoPrestamo = async (id) => {
     await obtenerCliente(id);
-    clienteSeleccionado.value = cliente.value
+    let dato = cliente.value
+    clienteSeleccionado.value.id = dato.id
+    clienteSeleccionado.value.numero_documento = dato.persona.numero_documento
     $('#modal-nuevo-prestamo').modal('show');
 }
 
