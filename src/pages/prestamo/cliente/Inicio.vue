@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useHelper } from '../../../helpers';
 import { useCliente } from '../../../composables/prestamo/clientes';
 import { useDatosSession } from '../../../composables/session';
+import dayjs from 'dayjs';
 import ClienteForm from './Form.vue';
 import VerDocumentosForm from './modals/VerDocumentos.vue';
 import PrePrestamoForm from './modals/PrePrestamo.vue';
@@ -11,26 +12,56 @@ const { Toast, Swal } = useHelper();
 
 const { usuario, roles } = useDatosSession();
 
-const clienteSeleccionado = ref({
+const prePrestamo = ref({
     id:'',
+    cliente_id:'',
     numero_documento:'',
     nombres:'',
     apellido_paterno:'',
     apellido_materno:'',
     telefono:'',
-    direccion:''
+    direccion:'',
+    fecha_prestamo:'',
+    user_id:'',
+    role:'',
+    frecuencia_pago_id:'',
+    capital_inicial:0,
+    aplicacion_interes_id:'',
+    interes:0,
+    numero_cuotas:1,
+    aplicacion_mora_id:'',
+    interes_moratorio:2.5,
+    dias_gracia:0,
+    total:0,
+    valor_cuota:0,
+    estado_crud:"",
+    cuotas:[],
+    errors:[]
 });
 
 const limpiarClienteSeleccionado = () => {
-    clienteSeleccionado.value = {
-        id:'',
-        numero_documento:'',
-        nombres:'',
-        apellido_paterno:'',
-        apellido_materno:'',
-        telefono:'',
-        direccion:''
-    }
+    prePrestamo.value.id='';
+    prePrestamo.value.cliente_id='';
+    prePrestamo.value.numero_documento='';
+    prePrestamo.value.nombres='';
+    prePrestamo.value.apellido_paterno='';
+    prePrestamo.value.apellido_materno='';
+    prePrestamo.value.telefono='';
+    prePrestamo.value.direccion='';
+    prePrestamo.value.fecha_prestamo='';
+    prePrestamo.value.user_id='';
+    prePrestamo.value.role='';
+    prePrestamo.value.frecuencia_pago_id='';
+    prePrestamo.value.capital_inicial=0;
+    prePrestamo.value.aplicacion_interes_id='';
+    prePrestamo.value.interes=0;
+    prePrestamo.value.numero_cuotas=1;
+    prePrestamo.value.aplicacion_mora_id='';
+    prePrestamo.value.interes_moratorio=2.5;
+    prePrestamo.value.dias_gracia=0;
+    prePrestamo.value.estado_crud="";
+    prePrestamo.value.cuotas=[];
+    prePrestamo.value.errors=[];
 }
 
 const {
@@ -178,10 +209,18 @@ const mostrarDocumentos = async(id) => {
 }
 
 const nuevoPrestamo = async (id) => {
+    limpiarClienteSeleccionado();
     await obtenerCliente(id);
-    let dato = cliente.value
-    clienteSeleccionado.value.id = dato.id
-    clienteSeleccionado.value.numero_documento = dato.persona.numero_documento
+    let dato = cliente.value;
+    prePrestamo.value.cliente_id = dato.id;
+    prePrestamo.value.numero_documento = dato.persona.numero_documento;
+    prePrestamo.value.nombres = dato.persona.nombres;
+    prePrestamo.value.apellido_paterno = dato.persona.apellido_paterno;
+    prePrestamo.value.apellido_materno = dato.persona.apellido_materno;
+    prePrestamo.value.telefono = dato.persona.telefono;
+    prePrestamo.value.direccion = dato.persona.direccion;
+    prePrestamo.value.fecha_prestamo = dayjs().format('YYYY-MM-DD');
+    prePrestamo.value.estado_crud = 'nuevo';
     $('#modal-nuevo-prestamo').modal('show');
 }
 
@@ -357,5 +396,5 @@ const nuevoPrestamo = async (id) => {
     </div>
     <ClienteForm :form="form" @onListar="listar"></ClienteForm>
     <VerDocumentosForm :archivos="archivos"></VerDocumentosForm>
-    <PrePrestamoForm :clientepr="clienteSeleccionado"></PrePrestamoForm>
+    <PrePrestamoForm :prePrestamo="prePrestamo"></PrePrestamoForm>
 </template>
